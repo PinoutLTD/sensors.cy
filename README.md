@@ -1,6 +1,5 @@
 # Create open sensors networks without centralization problems
 
-Создать децентрализованное приложение с фокусом внимания на пользователя открытой сенсорной сети.
 Decentralized Open Sensors Map. Don't forget to your IFPS ID into `src/agents.json` in case you set up your own [Sensors Connectivity module](https://github.com/airalab/sensors-connectivity/tree/master).
 
 ## Project setup
