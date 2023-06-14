@@ -35,8 +35,8 @@ export default {
   MAP: {
     zoom: "13",
     position: {
-      lat: "53.5197",
-      lng: "49.3647",
+      lat: "34.9704",
+      lng: "33.6634",
     },
   },
   SHOW_MESSAGES: true,
