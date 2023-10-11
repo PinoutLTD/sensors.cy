@@ -1,53 +1,50 @@
 <template>
-  <div id="app">
-    <!-- <Loader v-if="isLoader" /> -->
+  <div class="sensors-screen">
+    <div class="sensors-screen-layers">
+      <div class="sensors-screen-layers--center">
+        <Header :localeCurrent="$i18n.locale" :city="city" />
 
-    <div class="sensors-screen">
-      <div class="sensors-screen-layers">
-        <div class="sensors-screen-layers--center">
-          <Header :localeCurrent="$i18n.locale" :city="city" />
+        <div class="container sensors-container">
+          <Measures :current="type.toLowerCase()" />
+          <ColorfulScale />
 
-          <div class="container sensors-container">
-            <Measures :current="type.toLowerCase()" />
-            <ColorfulScale />
-
-            <template v-if="point">
-              <MessagePopup
-                v-if="point.data.message"
-                @close="handlerClose"
-                :data="point.data"
-              />
-              <SensorPopup
-                v-else
-                :sender="point.sender"
-                :sensor_id="point.sensor_id"
-                :log="point.log"
-                :model="point.model"
-                :address="point.address"
-                :geo="point.geo"
-                :type="type.toLowerCase()"
-                @modal="handlerModal"
-                @close="handlerClose"
-              />
-            </template>
-
-            <Map
-              :type="type"
-              :zoom="zoom"
-              :lat="lat"
-              :lng="lng"
-              :availableWind="provider === 'ipfs'"
-              @clickMarker="handlerClick"
-              @city="handlerChangeCity"
+          <template v-if="point">
+            <MessagePopup
+              v-if="point.data.message"
+              @close="handlerClose"
+              :data="point.data"
             />
-          </div>
+            <SensorPopup
+              v-else
+              :sender="point.sender"
+              :sensor_id="point.sensor_id"
+              :log="point.log"
+              :model="point.model"
+              :address="point.address"
+              :geo="point.geo"
+              :donated_by="point.donated_by"
+              :type="type.toLowerCase()"
+              @modal="handlerModal"
+              @close="handlerClose"
+            />
+          </template>
 
-          <Footer
-            :currentProvider="provider"
-            :canHistory="canHistory"
-            @history="handlerHistory"
+          <Map
+            :type="type"
+            :zoom="zoom"
+            :lat="lat"
+            :lng="lng"
+            :availableWind="provider === 'realtime'"
+            @clickMarker="handlerClick"
+            @city="handlerChangeCity"
           />
         </div>
+
+        <Footer
+          :currentProvider="provider"
+          :canHistory="canHistory"
+          @history="handlerHistory"
+        />
       </div>
     </div>
   </div>
@@ -69,6 +66,8 @@ import { instanceMap } from "../utils/map/instance";
 import * as markers from "../utils/map/marker";
 import { getAddressByPos } from "../utils/map/utils";
 import { getMapPosiotion } from "../utils/utils";
+
+import { useStore } from "@/store";
 
 const mapPosition = getMapPosiotion();
 
@@ -103,6 +102,13 @@ export default {
     Loader,
     MessagePopup,
   },
+
+  metaInfo() {
+    return {
+      meta: { name: "color-scheme", content: "dark light" },
+    };
+  },
+
   data() {
     return {
       providerReady: false,
@@ -113,18 +119,21 @@ export default {
       city: "",
       isShowInfo: false,
       providerObj: null,
+      store: useStore(),
     };
   },
   computed: {
     isLoader() {
-      return this.provider === "ipfs" && Object.keys(this.points).length === 0;
+      return (
+        this.provider === "realtime" && Object.keys(this.points).length === 0
+      );
     },
   },
   mounted() {
     if (this.provider === "remote") {
       this.providerObj = new providers.Remote(config.REMOTE_PROVIDER);
     } else {
-      this.providerObj = new providers.Ipfs(config.IPFS);
+      this.providerObj = new providers.Libp2p(config.LIBP2P);
     }
     this.providerObj.ready().then(() => {
       this.providerReady = true;
@@ -142,7 +151,22 @@ export default {
         }
       }, 1000);
     }
+
+    this.$nextTick(() => {
+      window
+        .matchMedia("(prefers-color-scheme: dark)")
+        .addEventListener("change", () => {
+          if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+            localStorage.setItem("theme", "light");
+            this.store.toggleTheme();
+          } else {
+            localStorage.setItem("theme", "dark");
+            this.store.toggleTheme();
+          }
+        });
+    });
   },
+
   watch: {
     point(_, oldValue) {
       if (oldValue) {
