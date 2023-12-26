@@ -165,6 +165,9 @@ export default {
           }
         });
     });
+
+    this.$matomo && this.$matomo.disableCookies();
+    this.$matomo && this.$matomo.trackPageView();
   },
 
   watch: {
