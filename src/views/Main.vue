@@ -5,8 +5,8 @@
         <Header :localeCurrent="$i18n.locale" :city="city" />
 
         <div class="container sensors-container">
-          <Measures :current="type.toLowerCase()" />
-          <ColorfulScale />
+          <!-- <Measures :current="type.toLowerCase()" /> -->
+          <ColorfulScale :type="type" />
 
           <template v-if="point">
             <MessagePopup
@@ -44,6 +44,7 @@
           :currentProvider="provider"
           :canHistory="canHistory"
           @history="handlerHistory"
+          :type="type"
         />
       </div>
     </div>

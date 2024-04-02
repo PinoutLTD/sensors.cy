@@ -1,6 +1,6 @@
 <template>
   <div class="map-wrapper">
-    <div class="map" id="map"></div>
+    <div :class="{ inactive: store.isColored }" class="map" id="map"></div>
   </div>
 </template>
 
