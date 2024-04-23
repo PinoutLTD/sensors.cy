@@ -26,8 +26,6 @@ export default {
 
   props: ["type"],
 
-  props: ["type"],
-
   data() {
     return {
       measurementsColors: [

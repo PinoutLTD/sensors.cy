@@ -20,9 +20,10 @@ export default defineConfig({
         cleanupOutdatedCaches: false,
       },
       manifest: {
-        name: "Robonomics Sensors",
-        short_name: "Sensors map",
-        description: "Decentralized opensource sensors air monitoring map",
+        name: "Robonomics Sensors CY",
+        short_name: "Robonomics Sensors CY",
+        description:
+          "Decentralized opensource sensors air monitoring map on Cyprus",
         theme_color: "#333",
         background_color: "#333",
         display: "standalone",

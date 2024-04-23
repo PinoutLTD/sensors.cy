@@ -16,12 +16,12 @@
         >Learn more</router-link
       >
     </div>
-    <router-link
+    <span
       v-for="color in measure.colors"
       :key="color.color"
       :to="{ name: 'air-measurements', hash: `#${measure.name}` }"
       :class="`colorful-scale__text colorful-scale__text--${color.color}`"
-      >{{ color.text }}</router-link
+      >{{ color.text }}</span
     >
   </div>
 </template>
@@ -109,35 +109,6 @@ export default {
   .colorful-scale__text {
     padding: calc(var(--gap) * 0.3);
     font-size: calc(var(--font-size) * 0.6);
-  }
-}
-
-.colorful-scale__text {
-  text-transform: none;
-  margin-left: 10px;
-  opacity: 0;
-  animation: fadeIn 0.5s ease-in-out 0.2s forwards;
-}
-
-.colorful-scale__text--green {
-  color: var(--color-green);
-}
-
-.colorful-scale__text--orange {
-  color: var(--color-orange);
-}
-
-.colorful-scale__text--red {
-  color: var(--color-red);
-}
-
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-  }
-
-  100% {
-    opacity: 1;
   }
 }
 </style>

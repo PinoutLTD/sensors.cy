@@ -27,7 +27,7 @@
           <select v-model="locale">
             <option value="en">EN</option>
             <option value="ru">RU</option>
-            <option value="el">Ελληνικά</option>
+            <option value="el">EL</option>
           </select>
         </div>
         <ThemeSwitcher />
@@ -58,11 +58,6 @@
           </details>
         </div>
       </div>
-      <button @click="openMenu" class="mobile" :class="{ active: isMenuOpen }">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
     </div>
   </header>
 </template>
@@ -206,7 +201,6 @@ h1.title > a {
 
 .menu-link {
   position: relative;
-  margin-top: 2px;
 }
 
 .menu-link details[open] summary {

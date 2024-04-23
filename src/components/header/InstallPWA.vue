@@ -1,7 +1,7 @@
 <template>
   <div class="container install-pwa__container" v-if="!isInstalled">
     <div class="install-pwa__content">
-      <img src="@/assets/images/sensors-world-app.png" alt="sensors-cy-app" />
+      <img src="@/assets/images/sensors-cy-app.png" alt="sensors-cy-app" />
       <div class="install-pwa__text">
         <h3>Available as web application (PWA)</h3>
         <button @click="installApp" class="install-pwa__btn">Install</button>
