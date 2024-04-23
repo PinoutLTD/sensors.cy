@@ -15,7 +15,7 @@
           </a>
         </li>
       </ul>
-      <div v-else>no bookmarks yet...</div>
+      <div v-else>{{ $t("header.noBookmarks") }}</div>
     </div>
   </div>
 </template>

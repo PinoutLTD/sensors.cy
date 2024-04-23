@@ -38,6 +38,7 @@ export default {
       descriptionLink5: "GitHub repository",
       descriptionLink6: "Instructions",
       bookmarkTitle: "Your bookmarks",
+      noBookmarks: "no bookmarks yet...",
     },
     measures: {
       pollutionScale: "Pollution scale",
@@ -184,6 +185,11 @@ export default {
       chooseDates: "Select dates",
       usecity: "Select locality",
     },
+    bookmark: {
+      input: "Type a name for sensor here",
+      btn: "Bookmark",
+      btnDone: "Bookmarked",
+    },
     notice_with_fz:
       "The specified data is not legally significant information for general use and special information in accordance with the federal law of July 19, 1998 no 113-fz «On the hydrometeorological service»",
     notice_without_fz:
@@ -228,6 +234,7 @@ export default {
       descriptionLink5: "GitHub repository",
       descriptionLink6: "Instructions",
       bookmarkTitle: "Your bookmarks",
+      noBookmarks: "no bookmarks yet...",
     },
     measures: {
       pollutionScale: "Шкала загрязнения",
@@ -374,6 +381,11 @@ export default {
       chooseDates: "Выбрать Даты",
       usecity: "Выбрать населенный пункт",
     },
+    bookmark: {
+      input: "Type a name for sensor here",
+      btn: "Bookmark",
+      btnDone: "Bookmarked",
+    },
     notice_with_fz:
       "Указанные данные не являются юридически значимой информацией для общего пользования и специальной информацией в соответствии с федеральным законом от 19.07.1998 г. no 113-фз «О гидрометеорологической службе»",
     notice_without_fz:
@@ -417,6 +429,8 @@ export default {
         "Μη διστάσετε να διαχωρίσετε το αποθετήριο GitHub αυτού του χάρτη και να το αναπτύξετε σε οποιονδήποτε τομέα της επιλογής σας. Με αυτήν την ευελιξία, έχετε την επιλογή να εμφανίσετε όλους τους αισθητήρες ή να ρυθμίσετε τη δική σας προσαρμοσμένη υπηρεσία. Πάρτε τον έλεγχο και κάντε το δικό σας!",
       descriptionLink5: "GitHub repository",
       descriptionLink6: "Οδηγίες",
+      bookmarkTitle: "Οι σελιδοδείκτες σας",
+      noBookmarks: "ΔΕΝ ΥΠΑΡΧΟΥΝ ΑΚΟΜΑ ΣΕλιδοδείκτες...",
     },
     measures: {
       pollutionScale: "Κλίμακα ρύπανσης",
@@ -513,7 +527,8 @@ export default {
         3: "Αποφύγετε το άμεσο ηλιακό φως κατά τις ώρες αιχμής και αναζητήστε ένα δροσερό μέρος εάν εμφανιστούν σημάδια θερμοπληξίας.",
       },
       HM: "Η υγρασία του αέρα είναι ένα μέτρο της περιεκτικότητας σε υδρατμούς στην ατμόσφαιρα. Το βέλτιστο επίπεδο υγρασίας για άνεση και υγεία κυμαίνεται από 40% έως 60%. Η υψηλή υγρασία μπορεί να προκαλέσει μπούκωμα, ενώ η χαμηλή υγρασία μπορεί να οδηγήσει σε ξηρότητα. Η μέτρηση της υγρασίας είναι χρήσιμη για τον έλεγχο του κλίματος του εσωτερικού αέρα.",
-      pollutionScaleHMText: "Τα επίπεδα υγρασίας μπορούν να κατηγοριοποιηθούν ως εξής:",
+      pollutionScaleHMText:
+        "Τα επίπεδα υγρασίας μπορούν να κατηγοριοποιηθούν ως εξής:",
       pollutionScaleHMText2:
         "Το βέλτιστο επίπεδο υγρασίας μπορεί να ποικίλλει ανάλογα με τις ατομικές προτιμήσεις και τις κλιματικές συνθήκες.",
       pollutionScaleHM: {
@@ -537,6 +552,11 @@ export default {
         4: "Πίνετε επαρκή ποσότητα νερού.",
         5: "Αναζητήστε ένα δροσερό μέρος και χρησιμοποιήστε ανεμιστήρες ή κλιματισμό.",
       },
+    },
+    bookmark: {
+      input: "Πληκτρολογήστε ένα όνομα για τον αισθητήρα εδώ",
+      btn: "σε σελιδοδείκτη",
+      btnDone: "σελιδοδείκτη",
     },
     footer: {
       history: "Λήψη ιστορικού",

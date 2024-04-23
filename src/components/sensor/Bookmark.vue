@@ -3,11 +3,11 @@
     <input
       type="text"
       v-model="bookmark"
-      placeholder="Type a name for sensor here"
+      :placeholder="$t('bookmark.input')"
       :disabled="IsBookmarked"
     />
-    <button v-if="!IsBookmarked">Bookmark</button>
-    <button class="bookmarked" v-else>Bookmarked</button>
+    <button v-if="!IsBookmarked">{{ $t("bookmark.btn") }}</button>
+    <button class="bookmarked" v-else>{{ $t("bookmark.btnDone") }}</button>
   </form>
 </template>
 
