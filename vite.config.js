@@ -3,11 +3,15 @@ import { fileURLToPath, URL } from "node:url";
 import vue from "@vitejs/plugin-vue";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
+// import mkcert from "vite-plugin-mkcert";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  // server: { https: true },
   plugins: [
     vue(),
+    // for pwa testing
+    // mkcert(),
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: "auto",
@@ -17,7 +21,7 @@ export default defineConfig({
       },
       manifest: {
         name: "Robonomics Sensors CY",
-        short_name: "Sensors map CY",
+        short_name: "Robonomics Sensors CY",
         description:
           "Decentralized opensource sensors air monitoring map on Cyprus",
         theme_color: "#333",
