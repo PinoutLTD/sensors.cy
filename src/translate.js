@@ -37,12 +37,12 @@ export default {
         "Feel free to fork the GitHub repository of this map and deploy it on any domain of your choice. With this flexibility, you have the option to display all sensors or set up your own customized service. Take control and make it your own!",
       descriptionLink5: "GitHub repository",
       descriptionLink6: "Instructions",
-      bookmarkTitle: "Your bookmarks",
-      noBookmarks: "no bookmarks yet...",
     },
     measures: {
       pollutionScale: "Pollution scale",
       recommendations: "Recommendations",
+      popupTitle: "Air measurements information",
+      popupPage: "Open measures page",
       PM10: "PM 10 (Particulate Matter 10) consists of atmospheric particles with a size of up to 10 micrometers, including dust, soot, and other pollutants. They can cause health problems by affecting breathing and contributing to respiratory diseases. Sources of PM 10 include industrial emissions, road dust, and fuel combustion. Monitoring and reducing PM 10 levels are important for maintaining clean air and promoting health.",
       pollutionScalePM10: {
         1: "0-50 µg/m³: Good air quality",
@@ -99,11 +99,10 @@ export default {
       },
       GO: "Radiation is energy transmitted in the form of particles or waves. Ionizing radiation (high energy) can cause ionization of atoms and molecules, which can be harmful to health. Non-ionizing radiation (low energy) has less impact but can still have various effects on the body. It is important to follow safety recommendations to minimize potential risks from radiation.The radiation scale is measured in units of exposure called 'sieverts' (Sv). Health risks from radiation increase with the dose.",
       pollutionScaleGO: {
-        1: "0.01 µSv/h and below: Background radiation level, usually safe.",
-        2: "0.01-0.1 µSv/h: Low radiation level, generally safe.",
-        3: "0.1-1 µSv/h: Moderate radiation level, may be safe for most people, but prolonged exposure may require monitoring.",
-        4: "1-10 µSv/h: Elevated radiation level, caution is needed.",
-        5: "10 µSv/h and above: High radiation level, poses a health risk.",
+        1: "<= 2.1 µSv/h and below: Background radiation level, usually safe.",
+        2: "<= 10 µSv/h: Moderate radiation level, may be safe for most people, but prolonged exposure may require monitoring.",
+        3: "<= 100 µSv/h: Elevated radiation level, caution is needed.",
+        4: "100 µSv/h and above: High radiation level, poses a health risk.",
       },
       pollutionScaleGOText:
         "Guidelines considered safe for long-term living typically range around 1-2 µSv/h (1000-2000 nanosieverts per hour) or less. However, short-term outdoor exposure at levels above 10 µSv/h does not pose a significant threat to health. It is important to adhere to recommendations and instructions from local health authorities, especially in areas with increased radiation risk.",
@@ -158,9 +157,6 @@ export default {
         5: "Seek a cool place and use fans or air conditioning.",
       },
     },
-    footer: {
-      history: "Download History",
-    },
     provider: {
       realtime: "Real time",
     },
@@ -179,11 +175,12 @@ export default {
     history: {
       city: "Locality",
       period: "Calendar period",
-      download: "Download .CSV",
       currentDay: "Current day",
       currentMonth: "Last month",
       chooseDates: "Select dates",
       usecity: "Select locality",
+      title: "Import data",
+      button: "Download csv file",
     },
     bookmark: {
       input: "Type a name for sensor here",
@@ -194,6 +191,31 @@ export default {
       "The specified data is not legally significant information for general use and special information in accordance with the federal law of July 19, 1998 no 113-fz «On the hydrometeorological service»",
     notice_without_fz:
       "This information holds no legal validity and is intended solely for personal use.",
+    sensorpopup: {
+      infotitle: "Advanced information",
+      bookmarkplaceholder: "A name for sensor",
+      bookmarkbutton: "Add to Bookmarks",
+      infosensorid: "Sensor id",
+      infosensormodel: "Sensor model",
+      infosensorgeo: "Sensor geoposition",
+      infosensorowner: "Sensor owner",
+      infosensordonated: "Donated by"
+    },
+    bookmarks: {
+      listtitle: "Your bookmarked sensors",
+      listempty: "Save any sensor from the map here for quicker access"
+    },
+    links: {
+      measurement: "Measurements guide",
+      github: "GitHub repository",
+      privacy: "Privacy policy"
+    },
+    scales: {
+      title: "Units of measurement",
+      upto: "up to",
+      above: "above"
+    },
+    showlocation: "Show my location",
   },
   ru: {
     header: {
@@ -233,12 +255,12 @@ export default {
         "Feel free to fork the GitHub repository of this map and deploy it on any domain of your choice. With this flexibility, you have the option to display all sensors or set up your own customized service. Take control and make it your own!",
       descriptionLink5: "GitHub repository",
       descriptionLink6: "Instructions",
-      bookmarkTitle: "Your bookmarks",
-      noBookmarks: "no bookmarks yet...",
     },
     measures: {
       pollutionScale: "Шкала загрязнения",
       recommendations: "Рекомендации",
+      popupTitle: "Air measurements information",
+      popupPage: "Open measures page",
       PM10: "PM 10 (Particulate Matter 10) — атмосферные частицы размером до 10 микрометров, которые включают пыль, сажу и другие загрязнители. Они могут вызывать проблемы со здоровьем, влияя на дыхание и вызывая респираторные заболевания. Источники PM 10 — промышленные выбросы, дорожная пыль и сжигание топлива. Мониторинг и снижение уровня PM 10 важны для чистого воздуха и здоровья.",
       pollutionScalePM10: {
         1: "0-50 мкг/м³: Хорошее качество воздуха",
@@ -294,11 +316,10 @@ export default {
       },
       GO: "Радиация - это энергия, передающаяся в виде частиц или волн. Ионизирующая радиация (высокая энергия) может вызывать ионизацию атомов и молекул, что может быть вредным для здоровья. Неионизирующая радиация (низкая энергия) имеет меньшее воздействие, но все же может оказывать различные эффекты на организм. Важно соблюдать рекомендации по безопасности для минимизации потенциальных рисков от радиации. Шкала радиации измеряется в единицах излучения - 'зивертах' (зв). Опасность для здоровья от радиации возрастает с увеличением дозы.",
       pollutionScaleGO: {
-        1: "0.01 мкЗв/ч и менее: Фоновый уровень радиации, обычно безопасный.",
-        2: "0.01-0.1 мкЗв/ч: Низкий уровень радиации, обычно безопасный.",
-        3: "0.1-1 мкЗв/ч: Умеренный уровень радиации, может быть безопасным для большинства людей, но длительное воздействие может потребовать мониторинга.",
-        4: "1-10 мкЗв/ч: Повышенный уровень радиации, требуется осторожность.",
-        5: "10 мкЗв/ч и выше: Высокий уровень радиации, представляет опасность для здоровья.",
+        1: "<= 2.1 мкЗв/ч и менее: Фоновый уровень радиации, обычно безопасный.",
+        2: "<= 10 мкЗв/ч: Умеренный уровень радиации, может быть безопасным для большинства людей, но длительное воздействие может потребовать мониторинга.",
+        3: "<= 100 мкЗв/ч: Повышенный уровень радиации, требуется осторожность.",
+        4: "100 мкЗв/ч и выше: Высокий уровень радиации, представляет опасность для здоровья.",
       },
       pollutionScaleGOText:
         "Нормы, считающиеся безопасными для долгосрочного проживания, обычно составляют около 1-2 мкЗв/ч (1000-2000 нанозиверт в час) или менее. Однако, кратковременное пребывание на улице при уровнях выше 10 мкЗв/ч не представляет большой угрозы для здоровья. Важно придерживаться рекомендаций и указаний местных органов здравоохранения, особенно в зонах повышенного радиационного риска.",
@@ -365,6 +386,11 @@ export default {
       messages: "Сообщения",
       help: "Слой ветер доступен в режиме реального времени",
     },
+    bookmark: {
+      input: "введите имя для сенсора",
+      btn: "добавить в закладки",
+      btnDone: "добавлено",
+    },
     details: {
       sensor: "Датчик",
       user: "Пользователь #",
@@ -375,11 +401,12 @@ export default {
     history: {
       city: "Населенный пункт",
       period: "Календарный период",
-      download: "Сохранить CSV",
       currentDay: "Текущие cутки",
       currentMonth: "Последний месяц",
       chooseDates: "Выбрать Даты",
       usecity: "Выбрать населенный пункт",
+      title: "Импорт данных",
+      button: "Скачать csv файл",
     },
     bookmark: {
       input: "Type a name for sensor here",
@@ -390,6 +417,31 @@ export default {
       "Указанные данные не являются юридически значимой информацией для общего пользования и специальной информацией в соответствии с федеральным законом от 19.07.1998 г. no 113-фз «О гидрометеорологической службе»",
     notice_without_fz:
       "Указанные данные не являются юридически значимой информацией.",
+    sensorpopup: {
+      infotitle: "Подробная информация",
+      bookmarkplaceholder: "Название сенсора",
+      bookmarkbutton: "Сохранить в закладки",
+      infosensorid: "ID датчика",
+      infosensormodel: "Модель датчика",
+      infosensorgeo: "Геопозиция датчика",
+      infosensorowner: "Владелец датчика",
+      infosensordonated: "Спонсирован"
+    },
+    bookmarks: {
+      listtitle: "Сохраненные датчики",
+      listempty: "Здесь вы можете сохранить датчики для быстрого просмотра"
+    },
+    links: {
+      measurement: "Руководство по измеренным показателям",
+      github: "Репозиторий GitHub",
+      privacy: "Политика конфиденциальности"
+    },
+    scales: {
+      title: "Единицы измерения",
+      upto: "до",
+      above: "выше"
+    },
+    showlocation: "Показать моё местоположение",
   },
   el: {
     header: {

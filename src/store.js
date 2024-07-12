@@ -1,50 +1,30 @@
 import { defineStore } from "pinia";
+import config from "./config";
+import { IDBgettable } from "./idb";
 
 export const useStore = defineStore({
   id: "main",
   state: () => ({
-    theme: "",
-    // helps to color map black&white when popup is opened
-    isColored: false,
     currentSensorPopupMeasures: [],
     currentActiveMeasure: "",
+    idbBookmarkDbname: 'SensorsDBBookmarks',
+    idbBookmarkVDbver: 6,
+    idbBookmarkVDbtable: 'bookmarks',
+    idbWatcherBroadcast: 'idb_changed', /* this we need until IndexedDB Observer will be available in browsers */
+    idbBookmarks: null,
+    sensors: [], // all uploaded sensors (getting via broadcast messages)
+    /* mapposition explainer: */
+    /* first onload we're trying to find user's geolocation */
+    /* if it's not possible we're trying to get last location from local storage (now it's "map-position" in localStorage) */
+    /* if nothing has worked we take config geo or 0 meridian if something with config happened */
+    mapposition: {
+      zoom: config?.MAP.zoom || '4',
+      lat:  config?.MAP.position.lat || '0',
+      lng:  config?.MAP.position.lng || '0',
+    },
+    mapinactive: false, /* For styling */
   }),
   actions: {
-    initTheme() {
-      const cachedTheme = localStorage.theme ? localStorage.theme : false;
-      const userPrefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)"
-      ).matches;
-
-      let theme = "light";
-      if (cachedTheme) {
-        theme = cachedTheme;
-      } else if (userPrefersDark) {
-        theme = "dark";
-      }
-      this.theme = theme;
-      localStorage.theme = theme;
-    },
-    toggleTheme() {
-      switch (localStorage.theme) {
-        case "light":
-          this.theme = "dark";
-          localStorage.theme = "dark";
-          break;
-
-        default:
-          this.theme = "light";
-          localStorage.theme = "light";
-          break;
-      }
-    },
-    // helps to color map black&white when popup is opened
-    colorMap() {
-      this.isColored = true;
-    },
-    removeColorMap() {
-      this.isColored = false;
-    },
     // add/remove active state to tabs in sensor popup
     addToggleState(measure) {
       if (!this.currentSensorPopupMeasures.includes(measure)) {
@@ -76,6 +56,23 @@ export const useStore = defineStore({
     },
     removeActiveCurrentMeasure() {
       this.currentActiveMeasure = "";
+    },
+    setmapposition(lat, lng, zoom) {
+      console.log('setmapposition', lat, lng, zoom)
+      this.mapposition.lat = lat;
+      this.mapposition.lng = lng;
+      this.mapposition.zoom = zoom;
+      localStorage.setItem("map-position", JSON.stringify({lat, lng, zoom}));
+    },
+    async idbBookmarkGet() {
+      this.idbBookmarks = await IDBgettable(this.idbBookmarkDbname, this.idbBookmarkVDbver, this.idbBookmarkVDbtable);
+
+      const bc = new BroadcastChannel(this.idbWatcherBroadcast);
+      bc.onmessage = async (e) => {
+        if(e.data === this.idbBookmarkVDbtable) {
+          this.idbBookmarks = await IDBgettable(this.idbBookmarkDbname, this.idbBookmarkVDbver, this.idbBookmarkVDbtable);
+        }
+      };
     },
   },
 });

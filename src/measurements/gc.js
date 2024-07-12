@@ -1,28 +1,43 @@
 export default {
   label: "GC",
+  name: {
+    en: "Radiation",
+    ru: "Радиация"
+  },
   unit: "μR/h",
-  icon: "circle-radiation",
   chartColor: "#e99152",
-  range: [0.01, 0.1, 1, 10],
+  range: [2, 10, 100, 1000],
   zones: [
     {
-      value: 0.01,
+      value: 2,
       color: "#60bc2a",
-    },
-    {
-      value: 0.1,
-      color: "#03a5ed",
-    },
-    {
-      value: 1,
-      color: "#ff9d00",
+      label: {
+        en: "Background",
+        ru: "Фоновая"
+      }
     },
     {
       value: 10,
-      color: "#ff4d00",
+      color: "#03a5ed",
+      label: {
+        en: "Moderate",
+        ru: "Невысокая"
+      }
     },
     {
-      color: "#7a00da",
+      value: 100,
+      color: "#ff9d00",
+      label: {
+        en: "Elevated",
+        ru: "Повышенная"
+      }
+    },
+    {
+      color: "#ff4d00",
+      label: {
+        en: "High",
+        ru: "Высокая"
+      }
     },
   ],
 };
