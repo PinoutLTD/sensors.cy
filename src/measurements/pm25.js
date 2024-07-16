@@ -12,7 +12,8 @@ export default {
       color: "#60bc2a",
       label: {
         en: "Good",
-        ru: "Хорошо"
+        ru: "Хорошо",
+        el: "Πρόστιμο",
       }
     },
     {
@@ -20,7 +21,8 @@ export default {
       color: "#12bfcc",
       label: {
         en: "Satisfyingly",
-        ru: "Удовлетворительно"
+        ru: "Удовлетворительно",
+        el: "Ικανοποιητικά",
       }
     },
     {
@@ -28,7 +30,8 @@ export default {
       color: "#ff9d00",
       label: {
         en: "Poor",
-        ru: "Плохо"
+        ru: "Плохо",
+        el: "Κακώς",
       }
     },
     {
@@ -36,14 +39,16 @@ export default {
       color: "#ff4d00",
       label: {
         en: "Very poor",
-        ru: "Очень плохо"
+        ru: "Очень плохо",
+        el: "Πολύ κακό",
       }
     },
     {
       color: "#7a00da",
       label: {
         en: "Unacceptable",
-        ru: "Неприемлемо"
+        ru: "Неприемлемо",
+        el: "Απαράδεκτος",
       }
     },
   ],

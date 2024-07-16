@@ -4,7 +4,8 @@ export default {
   label: "NH3",
   name: {
     en: "Ammonia",
-    ru: "Аммиак"
+    ru: "Аммиак",
+    el: "Αμμωνία",
   },
   unit: "mg/m3",
   icon: "vial-virus",
@@ -17,7 +18,8 @@ export default {
       color: "#60bc2a",
       label: {
         en: "Good",
-        ru: "Хорошо"
+        ru: "Хорошо",
+        el: "Πρόστιμο",
       }
     },
     {
@@ -25,14 +27,16 @@ export default {
       color: "#ff9d00",
       label: {
         en: "Satisfyingly",
-        ru: "Удовлетворительно"
+        ru: "Удовлетворительно",
+        el: "Ικανοποιητικά",
       }
     },
     {
       color: "#fc0202",
       label: {
         en: "Poor",
-        ru: "Плохо"
+        ru: "Плохо",
+        el: "Κακώς",
       }
     },
   ],

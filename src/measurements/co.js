@@ -4,7 +4,8 @@ export default {
   label: "CO",
   name: {
     en: "Carbon monoxide",
-    ru: "Угарный газ"
+    ru: "Угарный газ",
+    el: "Μονοξείδιο του άνθρακα",
   },
   unit: "mg/m3",
   chartColor: "#c1c1c1",
@@ -16,7 +17,8 @@ export default {
       color: "#60bc2a",
       label: {
         en: "Good",
-        ru: "Хорошо"
+        ru: "Хорошо",
+        el: "Πρόστιμο",
       }
     },
     {
@@ -24,7 +26,8 @@ export default {
       color: "#12bfcc",
       label: {
         en: "Satisfyingly",
-        ru: "Удовлетворительно"
+        ru: "Удовлетворительно",
+        el: "Ικανοποιητικά",
       }
     },
     {
@@ -32,14 +35,16 @@ export default {
       color: "#ff9d00",
       label: {
         en: "Poor",
-        ru: "Плохо"
+        ru: "Плохо",
+        el: "Κακώς",
       }
     },
     {
       color: "#7a00da",
       label: {
         en: "Very poor",
-        ru: "Очень плохо"
+        ru: "Очень плохо",
+        el: "Πολύ κακό",
       }
     },
   ],

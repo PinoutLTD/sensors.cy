@@ -2,6 +2,11 @@ import { toFixed } from "./tools";
 
 export default {
   label: "Noise Avg.",
+  name: {
+    en: "Noise average",
+    ru: "Шум (среднее)",
+    el: "Θόρυβος (μέσος όρος)",
+  },
   unit: "dB",
   range: [0, 40, 70, 80, 100],
   zones: [
@@ -10,7 +15,8 @@ export default {
       color: "#60bc2a",
       label: {
         en: "Faint",
-        ru: "Тихо"
+        ru: "Тихо",
+        el: "Ησυχια",
       }
     },
     {
@@ -18,7 +24,8 @@ export default {
       color: "#12bfcc",
       label: {
         en: "Moderate",
-        ru: "Удовлетворительно"
+        ru: "Удовлетворительно",
+        el: "Ικανοποιητικά",
       }
     },
     {
@@ -26,7 +33,8 @@ export default {
       color: "#ff9d00",
       label: {
         en: "Loud",
-        ru: "Шумно"
+        ru: "Шумно",
+        el: "Θορυβώδης",
       }
     },
     {
@@ -34,14 +42,16 @@ export default {
       color: "#ff4d00",
       label: {
         en: "Very loud",
-        ru: "Очень шумно"
+        ru: "Очень шумно",
+        el: "Πολύ θορυβώδες",
       }
     },
     {
       color: "#7a00da",
       label: {
         en: "Extremely loud",
-        ru: "Экстремально шумно"
+        ru: "Экстремально шумно",
+        el: "Εξαιρετικά θορυβώδες",
       }
     },
   ],
