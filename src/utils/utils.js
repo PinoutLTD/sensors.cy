@@ -5,30 +5,10 @@ export function getAgents() {
   return agents;
 }
 
-export function saveMapPosiotion(zoom, lat, lng) {
-  localStorage.setItem(
-    "map-position",
-    JSON.stringify({
-      zoom,
-      lat,
-      lng,
-    })
-  );
+export function setTypeProvider(type) {
+  localStorage.setItem("provider_type", type);
 }
 
-export function getMapPosiotion() {
-  let result;
-  try {
-    result = JSON.parse(localStorage.getItem("map-position"));
-  } catch (error) {
-    console.log(error);
-  }
-  if (!result) {
-    return {
-      zoom: config.MAP.zoom,
-      lat: config.MAP.position.lat,
-      lng: config.MAP.position.lng,
-    };
-  }
-  return result;
+export function getTypeProvider() {
+  return localStorage.getItem("provider_type") || config.DEFAUL_TYPE_PROVIDER;
 }

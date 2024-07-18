@@ -280,7 +280,7 @@ function createMarkerUser(coord, data) {
 function createMarker(point, colors) {
   const coord = [point.geo.lat, point.geo.lng];
   let marker;
-  if (sensors[point.sensor_id]) {
+  if (sensors[point.sensor_id] && sensors[point.sensor_id].icon) {
     marker = createMarkerBrand(coord, point, colors);
   } else if (point.data.windang) {
     marker = createMarkerArrow(coord, point, colors);
@@ -319,6 +319,12 @@ export async function addPoint(point) {
         console.log(point);
       } else if (point.model === 2) {
         await addMarker(point);
+
+        /* + Broadcasting about new sensor */
+        const bc = new BroadcastChannel("sensors");
+        bc.postMessage(point);
+        bc.close();
+        /* - Broadcasting about new sensor */
       } else if (point.model === 3) {
         await addMarker(point);
         await addPointPath(point);
@@ -462,6 +468,12 @@ async function addMarkerUser(point) {
 export function clear() {
   if (markersLayer) {
     markersLayer.clearLayers();
+
+    /* + Broadcasting about removing all sensors */
+    const bc = new BroadcastChannel("sensorsremoved");
+    bc.postMessage(true);
+    bc.close();
+    /* - Broadcasting about removing all sensors */
   }
   if (pathsLayer) {
     pathsLayer.clearLayers();

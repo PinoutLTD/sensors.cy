@@ -1,134 +1,309 @@
 <template>
-  <div class="map-wrapper">
-    <div :class="{ inactive: store.isColored }" class="map" id="map"></div>
-  </div>
+  <div :class="{ inactive: store.mapinactive }" class="mapcontainer" id="map"></div>
+  <Footer
+    :currentProvider="provider"
+    :canHistory="historyready"
+    @history="historyhandler"
+    :measuretype="measuretype"
+  >
+    <button
+      class="popovercontrol"
+      v-if="geoavailable"
+      @click.prevent="resetgeo"
+      :area-label="$t('showlocation')"
+      :title="$t('showlocation')"
+    >
+      <font-awesome-icon icon="fa-solid fa-location-arrow" />
+    </button>
+  </Footer>
 </template>
 
 <script>
 import { useStore } from "@/store";
-import { watchEffect } from "vue";
-import config from "../config";
-import { init, setTheme } from "../utils/map/instance";
+import { drawuser, init, removeMap, setTheme, setview } from "../utils/map/instance";
 import { init as initMarkers } from "../utils/map/marker";
-import { getCityByPos } from "../utils/map/utils";
 import { init as initWind } from "../utils/map/wind";
-import { saveMapPosiotion } from "../utils/utils";
+import { getTypeProvider } from "../utils/utils";
+import Footer from "../components/footer/Footer.vue";
+import config from "../config";
 
 export default {
-  emits: ["city", "clickMarker"],
-  props: ["zoom", "lat", "lng", "type", "availableWind"],
-  setup() {
-    const store = useStore();
-
-    watchEffect(() => {
-      try {
-        setTheme(store.theme);
-        // eslint-disable-next-line no-empty
-      } catch (_) {}
-    });
-
+  emits: ["city", "clickMarker", "close"],
+  props: ["measuretype", "historyready", "historyhandler"],
+  components: { Footer },
+  data() {
     return {
-      store,
+      store: useStore(),
+      locale: localStorage.getItem("locale") || this.$i18n.locale || "en",
+      theme: window?.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark",
+      userposition: null,
+      geoavailable: false,
     };
   },
-  async mounted() {
-    if (this.zoom > 9) {
-      getCityByPos(this.lat, this.lng, this.$i18n.locale).then((r) => {
-        this.$emit("city", r);
-      });
-    }
-    const map = init([this.lat, this.lng], this.zoom, this.store.theme);
-    map.on("zoomend", (e) => {
-      const pos = e.target.getCenter();
-      saveMapPosiotion(
-        e.target.getZoom(),
-        pos.lat.toFixed(4),
-        pos.lng.toFixed(4)
-      );
-      this.$router.replace({
+
+  computed: {
+    zoom() {
+      return this.store.mapposition.zoom;
+    },
+    lat() {
+      return this.store.mapposition.lat;
+    },
+    lng() {
+      return this.store.mapposition.lng;
+    },
+    provider() {
+      return getTypeProvider();
+    },
+  },
+
+  methods: {
+    themelistener({ matches, media }) {
+      if (!matches) {
+        // Not matching anymore = not interesting
+        return;
+      }
+
+      if (media === "(prefers-color-scheme: dark)") {
+        this.theme = "dark";
+      } else if (media === "(prefers-color-scheme: light)") {
+        this.theme = "light";
+      }
+
+      setTheme(this.theme);
+    },
+
+    relocatemap(lat, lng, zoom, type) {
+      console.log('relocatemap', lat, lng, zoom, type)
+      const options = {
         name: "main",
         params: {
-          provider: this.$route.params.provider || config.DEFAUL_TYPE_PROVIDER,
+          provider: getTypeProvider(),
           type: this.$route.params.type || "pm10",
-          zoom: e.target.getZoom(),
-          lat: pos.lat.toFixed(4),
-          lng: pos.lng.toFixed(4),
+          zoom: zoom,
+          lat: lat,
+          lng: lng,
           sensor: this.$route.params.sensor,
         },
-      });
-    });
-    map.on("moveend", (e) => {
-      const pos = e.target.getCenter();
-      const zoom = e.target.getZoom();
-      if (zoom > 9) {
-        getCityByPos(pos.lat, pos.lng, this.$i18n.locale).then((r) => {
-          this.$emit("city", r);
-        });
-      } else {
-        this.$emit("city", "");
+      };
+
+      if (this.$router.currentRoute.value.name === "main") {
+        /* added here check for current route is map (main), as it caused problems with other pages */
+        if (type === "reload") {
+          this.$router.push(options).catch((e) => {
+            console.warn(e);
+          });
+          setview([lat, lng], zoom);
+        } else {
+          this.$router.replace(options).catch((e) => {
+            console.warn(e);
+          });
+        }
       }
-      saveMapPosiotion(
-        e.target.getZoom(),
-        pos.lat.toFixed(4),
-        pos.lng.toFixed(4)
+    },
+
+    getlocalmappos() {
+      const lastsettings = localStorage.getItem("map-position") || JSON.stringify({"lat": config.MAP.position.lat, "lng": config.MAP.position.lng, "zoom": config.MAP.position.zoom });
+      this.store.setmapposition(
+        JSON.parse(lastsettings).lat,
+        JSON.parse(lastsettings).lng,
+        JSON.parse(lastsettings).zoom
       );
-      this.$router
-        .replace({
-          name: "main",
-          params: {
-            provider:
-              this.$route.params.provider || config.DEFAUL_TYPE_PROVIDER,
-            type: this.$route.params.type || "pm10",
-            zoom: e.target.getZoom(),
-            lat: pos.lat.toFixed(4),
-            lng: pos.lng.toFixed(4),
-            sensor: this.$route.params.sensor,
-          },
-        })
-        .catch(() => {});
-    });
+    },
 
-    initMarkers(map, this.type, (data) => {
-      this.$emit("clickMarker", data);
-    });
+    setgeo(force = false) {
+      return new Promise((resolve) => {
+        const latinurl = this.$router?.currentRoute.value?.params?.lat;
+        const lnginurl = this.$router?.currentRoute.value?.params?.lng;
+        const zoominurl = this.$router?.currentRoute.value?.params?.zoom;
 
-    if (this.availableWind) {
-      await initWind();
+        if((!latinurl || !lnginurl) || force) {
+          if ("geolocation" in navigator) {
+
+            navigator.geolocation.getCurrentPosition(
+              (position) => {
+                /* setting for the app globally user's geo position and zoom 20 for better view */
+                this.userposition = [position.coords.latitude, position.coords.longitude];
+                this.store.setmapposition(this.userposition[0], this.userposition[1], 20);
+              },
+              (e) => {
+                /* Если не удалось получить позицию юзера, то проверяем локальное хранилище */
+                console.error(`geolocation error(${e.code}): ${e.message}`);
+                this.getlocalmappos();
+              },
+              {
+                enableHighAccuracy: false,
+                timeout: 20000,
+                maximumAge: 1000
+              }
+            );
+          } else {
+            /* Если нет возможности "geolocation", то проверяем локальное хранилище */
+            this.getlocalmappos();
+          }
+        } else {
+          this.store.setmapposition(latinurl, lnginurl, zoominurl || config.MAP.position.zoom);
+        }
+
+        resolve();
+        
+      });
+    },
+
+    resetgeo() {
+      this.setgeo(true).then(() => {
+        this.relocatemap(this.lat, this.lng, this.zoom, "reload");
+      }).catch(e => {
+        console.log('resetgeo error', e)
+      })
+    },
+
+    setgeopermission(permission) {
+      if(permission.state === 'granted') {
+        this.geoavailable = true;
+      } else {
+        this.geoavailable = false;
+      }
     }
+  },
+
+  unmounted() {
+    removeMap();
+  },
+
+  async mounted() {
+
+    /* + get user's system theme */
+    if (window.matchMedia) {
+      window
+        .matchMedia("(prefers-color-scheme: dark)")
+        .addEventListener("change", this.themelistener);
+      window
+        .matchMedia("(prefers-color-scheme: light)")
+        .addEventListener("change", this.themelistener);
+    }
+    /* - get user's system theme */
+
+    /* + get user's permission for geo */
+    if ("geolocation" in navigator) {   
+      navigator.permissions.query({ name: "geolocation" }).then((result) => {
+        this.setgeopermission(result);
+
+        result.addEventListener("change", () => {
+          this.setgeopermission(result);
+        });
+      });
+    }
+    /* - get user's permission for geo */
+
+
+    /* + Operate with a map */
+
+    /* retrieve coordinates */
+    this.setgeo()
+    .then(async () => {
+      const map = init([this.lat, this.lng], this.zoom, this.theme);
+      this.relocatemap(this.lat, this.lng, this.zoom, "reload");
+
+      if (this.userposition) {
+        drawuser(this.userposition, this.zoom);
+      }
+
+      map.on("zoomend", (e) => {
+        this.relocatemap(
+          e.target.getCenter().lat.toFixed(4),
+          e.target.getCenter().lng.toFixed(4),
+          e.target.getZoom()
+        );
+        this.store.setmapposition(
+          e.target.getCenter().lat.toFixed(4),
+          e.target.getCenter().lng.toFixed(4),
+          e.target.getZoom()
+        );
+      });
+
+      map.on("moveend", (e) => {
+        /* setTimeout for mobiles (whne swiping up app, it causes unpleasant map moving before closing app) */
+        setTimeout( () => {
+          this.relocatemap(
+            e.target.getCenter().lat.toFixed(4),
+            e.target.getCenter().lng.toFixed(4),
+            e.target.getZoom()
+          );
+          this.store.setmapposition(
+            e.target.getCenter().lat.toFixed(4),
+            e.target.getCenter().lng.toFixed(4),
+            e.target.getZoom()
+          );
+        }, 50)
+      });
+
+      initMarkers(map, this.measuretype, (data) => {
+        this.$emit("clickMarker", data);
+      });
+
+      if (this.provider === "realtime") {
+        await initWind();
+      }
+    });
+    // .catch(() => {
+    //   console.error('map drawing error');
+    // });
+    /* - Operate with a map */
+
+    /* get bookmarks and listenning for broadcast from DB */
+    await this.store.idbBookmarkGet();
   },
 };
 </script>
 
 <style>
-#map {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  max-height: 100%;
-  height: auto;
-  z-index: 0;
-  width: 100vw;
-  height: 100vh;
-}
-
-.leaflet-bottom {
-  bottom: 70px;
-}
-
-#map.inactive {
-  filter: grayscale(100%);
-}
-
-.leaflet-control-attribution.leaflet-control {
+/* + open source leaflet map rewritings */
+.leaflet-control-attribution,
+.leaflet-container .leaflet-control-attribution {
   font-size: calc(var(--font-size) * 0.5);
+  background: none;
+  margin: 0 !important;
 }
 
-@media screen and (max-width: 680px) {
-  .leaflet-bottom {
-    bottom: 0px;
-  }
+.leaflet-bottom .leaflet-control-locate {
+  border: var(--app-borderwidth) solid var(--app-bordercolor);
 }
+
+.leaflet-bottom .leaflet-control-locate .leaflet-bar-part-single {
+  background: var(--app-inputbg);
+}
+
+.leaflet-right .leaflet-control {
+  margin-right: var(--gap);
+}
+
+.leaflet-bottom .leaflet-control {
+  margin-bottom: 0.3rem;
+}
+
+.leaflet-control-locate a .leaflet-control-locate-location-arrow,
+.leaflet-control-locate.following a .leaflet-control-locate-location-arrow {
+  background: var(--app-bordercolor);
+}
+
+.leaflet-touch .leaflet-bar,
+.leaflet-touch .leaflet-bar a,
+.leaflet-bar a,
+.leaflet-bar {
+  border-radius: 50% !important;
+}
+
+.leaflet-touch .leaflet-bar a,
+.leaflet-bar a {
+  width: calc(var(--app-inputheight) - var(--app-borderwidth) * 2);
+  height: calc(var(--app-inputheight) - var(--app-borderwidth) * 2);
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50% !important;
+}
+/* - open source leaflet map rewritings */
 
 .marker-cluster-circle {
   border-width: 2px;
@@ -149,12 +324,29 @@ export default {
   height: 40px !important;
 }
 .marker-icon-brand {
-  width: 40px !important;
-  height: 40px !important;
+  width: 35px !important;
+  height: 35px !important;
   border-radius: 50%;
 }
 .marker-icon-msg {
   width: 40px;
   height: 40px;
+}
+</style>
+
+<style scoped>
+.mapcontainer {
+  background-color: var(--color-light-gray);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100svh;
+  overflow: hidden;
+}
+
+.mapcontainer.inactive {
+  filter: grayscale(100%);
 }
 </style>
