@@ -1,16 +1,14 @@
 import { toFixed } from "./tools";
 
 export default {
-  label: "Noise Max.",
+  label: "Noise",
   name: {
-    en: "Noise Max.",
-    ru: "Шум Макс.",
-    el: "Θόρυβος (μέγιστος).",
+    en: "Noise",
+    ru: "Шум"
   },
   nameshort: {
-    en: "Noise Max.",
-    ru: "Шум Макс.",
-    el: "Θόρυβος (μέγιστος).",
+    en: "Noise",
+    ru: "Шум"
   },
   unit: "dB",
   range: [0, 40, 70, 80, 100],
@@ -20,8 +18,7 @@ export default {
       color: "#60bc2a",
       label: {
         en: "Faint",
-        ru: "Тихо",
-        el: "Ησυχια",
+        ru: "Тихо"
       }
     },
     {
@@ -29,8 +26,7 @@ export default {
       color: "#12bfcc",
       label: {
         en: "Moderate",
-        ru: "Удовлетворительно",
-        el: "Ικανοποιητικά",
+        ru: "Удовлетворительно"
       }
     },
     {
@@ -38,8 +34,7 @@ export default {
       color: "#ff9d00",
       label: {
         en: "Loud",
-        ru: "Шумно",
-        el: "Θορυβώδης",
+        ru: "Шумно"
       }
     },
     {
@@ -47,16 +42,14 @@ export default {
       color: "#ff4d00",
       label: {
         en: "Very loud",
-        ru: "Очень шумно",
-        el: "Πολύ θορυβώδες",
+        ru: "Очень шумно"
       }
     },
     {
       color: "#7a00da",
       label: {
         en: "Extremely loud",
-        ru: "Экстремально шумно",
-        el: "Εξαιρετικά θορυβώδες",
+        ru: "Экстремально шумно"
       }
     },
   ],

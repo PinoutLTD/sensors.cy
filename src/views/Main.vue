@@ -103,6 +103,12 @@ export default {
         markers.hidePath(oldValue.sensor_id);
       }
     },
+    type(value) {
+      /* save current active unit for another js scripts */
+      if (value) {
+        localStorage.setItem("currentUnit", value);
+      }
+    },
   },
   methods: {
     async handlerHistory({ start, end }) {
@@ -116,7 +122,7 @@ export default {
       const startDate = moment.unix(start).format("YYYY-MM-DD");
       let sensors;
       if (today === startDate) {
-        sensors = await this.providerObj.lastValuesForPeriod(start, end);
+        sensors = await this.providerObj.lastValuesForPeriod(start, end, this.type);
       } else {
         sensors = await this.providerObj.maxValuesForPeriod(start, end, this.type);
       }
@@ -130,18 +136,21 @@ export default {
         this.handlerNewPoint(messages[message]);
       }
     },
-    handlerNewPoint(point) {
+    async handlerNewPoint(point) {
       if (!point.model || !markers.isReadyLayers()) {
         return;
       }
       point.data = point.data
         ? Object.fromEntries(Object.entries(point.data).map(([k, v]) => [k.toLowerCase(), v]))
         : {};
+
+      /* + ADD MARKER */
       markers.addPoint({
         ...point,
         isEmpty: !point.data[this.type.toLowerCase()],
         value: point.data[this.type.toLowerCase()],
       });
+      /* - ADD MARKER */
 
       if (point.sensor_id === this.sensor) {
         this.handlerClick(point);
@@ -185,7 +194,6 @@ export default {
         address,
         log: [...log],
       };
-
     },
     async handlerHistoryLog({ sensor_id, start, end }) {
       if (this.status === "history") {
@@ -284,6 +292,13 @@ export default {
     } else {
       this.providerObj = new providers.Libp2p(config.LIBP2P);
     }
+
+    const result = await providers.Remote.getMeasurements(
+      moment().startOf("day").format("X"),
+      moment().format("X")
+    );
+    console.log(result);
+
     this.providerObj.ready().then(() => {
       this.providerReady = true;
       this.providerObj.watch(this.handlerNewPoint);
@@ -297,21 +312,10 @@ export default {
       }, 1000);
     }
 
-    // get user's geolocation with consent
-    // const coords = JSON.parse(localStorage.getItem("map-position"));
-    // if (
-    //   (coords &&
-    //     coords.lat === config.MAP.position.lat &&
-    //     coords.lng === config.MAP.position.lng) ||
-    //   (coords && Object.entries(coords).length === 0) ||
-    //   !coords
-    // ) {
-    //   navigator.geolocation.getCurrentPosition(
-    //     this.getGeoLocationSuccess,
-    //     this.getGeoLocationError,
-    //     this.geoLocationOptions
-    //   );
-    // }
+    /* save current active unit for another js scripts */
+    if (this.type) {
+      localStorage.setItem("currentUnit", this.type);
+    }
 
     this.$matomo && this.$matomo.disableCookies();
     this.$matomo && this.$matomo.trackPageView();
