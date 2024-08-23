@@ -6,15 +6,21 @@
     @history="historyhandler"
     :measuretype="measuretype"
   >
-    <button
-      class="popovercontrol"
-      v-if="geoavailable"
-      @click.prevent="resetgeo"
-      :area-label="$t('showlocation')"
-      :title="$t('showlocation')"
-    >
-      <font-awesome-icon icon="fa-solid fa-location-arrow" />
-    </button>
+
+  <button
+    class="popovercontrol popoovergeo"
+    v-if="geoavailable"
+    @click.prevent="resetgeo"
+    :area-label="$t('showlocation')"
+    :title="geoisloading ? $t('locationloading') : $t('showlocation')"
+  >
+    <font-awesome-icon icon="fa-solid fa-location-arrow" :fade="geoisloading" />
+
+    <div class="popoovergeo-tip" v-if="geomsg !== ''" :class="geomsgopened ? 'opened' : 'closed'">
+      {{geomsg}}
+      <font-awesome-icon icon="fa-solid fa-xmark" class="popoovergeo-tipclose" @click.stop="geomsg = ''" />
+    </div>
+  </button>
   </Footer>
 </template>
 
@@ -38,6 +44,12 @@ export default {
       theme: window?.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark",
       userposition: null,
       geoavailable: false,
+      geoisloading: false,
+      geomsg: '',
+      geomsgopened: false,
+      geomsgopenedtime: 5000, // 5 seconds
+      geomsgopenedtimer: null,
+      map: null,
     };
   },
 
@@ -72,7 +84,7 @@ export default {
       setTheme(this.theme);
     },
 
-    relocatemap(lat, lng, zoom, type) {
+    relocatemap(lat, lng, zoom, type = "default") {
       console.log('relocatemap', lat, lng, zoom, type)
       const options = {
         name: "main",
@@ -101,114 +113,124 @@ export default {
       }
     },
 
+    closegeotip() {
+      this.geomsg = '';
+      this.geomsgopened = false;
+
+      if (this.geomsgopenedtimer) {
+        clearTimeout(this.geomsgopenedtimer);
+      }
+    },
+
+    opengeotip(msg) {
+
+      this.closegeotip();
+      
+      this.geomsg = msg;
+      this.geomsgopened = true;
+
+      this.geomsgopenedtimer = setTimeout(() => {
+        this.geomsg = '';
+        this.geomsgopened = false;
+      }, this.geomsgopenedtime);
+    },
+
     getlocalmappos() {
-      const lastsettings = localStorage.getItem("map-position") || JSON.stringify({"lat": config.MAP.position.lat, "lng": config.MAP.position.lng, "zoom": config.MAP.position.zoom });
+      // console.log("Geolocation setting up default values");
+      const lastsettings = localStorage.getItem("map-position") || JSON.stringify({"lat": config.MAP.position.lat, "lng": config.MAP.position.lng, "zoom": config.MAP.zoom });
+      const savelocally = true;
+
+      /* We don't need to save position loacally if there is set from config */
+      if(!localStorage.getItem("map-position")) {
+        savelocally = false;
+      }
+
       this.store.setmapposition(
         JSON.parse(lastsettings).lat,
         JSON.parse(lastsettings).lng,
-        JSON.parse(lastsettings).zoom
+        JSON.parse(lastsettings).zoom,
+        savelocally
       );
+
+      // if(localStorage.getItem("map-position")) {
+      //   this.geomsg += "Geolocation is set from saved data";
+      // } else {
+      //   this.geomsg += "Geolocation is set by default";
+      // }
     },
 
-    setgeo(force = false) {
-      return new Promise((resolve) => {
-        const latinurl = this.$router?.currentRoute.value?.params?.lat;
-        const lnginurl = this.$router?.currentRoute.value?.params?.lng;
-        const zoominurl = this.$router?.currentRoute.value?.params?.zoom;
+    setgeo(forse = false) {
+      return new Promise((resolve, reject) => {
+        this.geoisloading = true;
 
-        if((!latinurl || !lnginurl) || force) {
-          if ("geolocation" in navigator) {
+        if ("geolocation" in navigator) {
 
+          this.geoavailable = true;
+
+          if(localStorage.getItem("map-position") && !forse) {
+            this.getlocalmappos();
+            resolve("Geolocation is set from local data");
+          } else {
             navigator.geolocation.getCurrentPosition(
               (position) => {
                 /* setting for the app globally user's geo position and zoom 20 for better view */
                 this.userposition = [position.coords.latitude, position.coords.longitude];
                 this.store.setmapposition(this.userposition[0], this.userposition[1], 20);
+
+                if (this.userposition && this.map) {
+                  drawuser(this.userposition, this.zoom);
+                }
+
+                resolve('Geolocation is determined');
               },
               (e) => {
-                /* Если не удалось получить позицию юзера, то проверяем локальное хранилище */
-                console.error(`geolocation error(${e.code}): ${e.message}`);
-                this.getlocalmappos();
+                reject(`Geolocation is not established [code - ${e.code}]`);
               },
               {
-                enableHighAccuracy: false,
-                timeout: 20000,
-                maximumAge: 1000
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 5 * 60 * 1000
               }
             );
-          } else {
-            /* Если нет возможности "geolocation", то проверяем локальное хранилище */
-            this.getlocalmappos();
           }
-        } else {
-          this.store.setmapposition(latinurl, lnginurl, zoominurl || config.MAP.position.zoom);
-        }
 
-        resolve();
+          // navigator.permissions.query({ name: "geolocation" }).then((result) => {
+          //   console.log('permission', result.state);
+
+          //   result.onchange( () => {
+          //     console.log('permission changed', result.state);
+          //   })
+          // });
+          } else {
+            this.geoavailable = false;
+            reject("Geolocation is not available");
+          }
         
       });
     },
 
     resetgeo() {
-      this.setgeo(true).then(() => {
+      this.closegeotip();
+
+      this.setgeo(true).then((m) => {
+        // console.log("Geolocation set succesfully");
         this.relocatemap(this.lat, this.lng, this.zoom, "reload");
-      }).catch(e => {
-        console.log('resetgeo error', e)
+        this.geoisloading = false;
+        this.opengeotip(m);
+      }).catch((m) => {
+        // console.log("Error in 'resetgeo': ", e);
+        this.geoisloading = false;
+        this.opengeotip(m);
       })
     },
 
-    setgeopermission(permission) {
-      if(permission.state === 'granted') {
-        this.geoavailable = true;
-      } else {
-        this.geoavailable = false;
-      }
-    }
-  },
-
-  unmounted() {
-    removeMap();
-  },
-
-  async mounted() {
-
-    /* + get user's system theme */
-    if (window.matchMedia) {
-      window
-        .matchMedia("(prefers-color-scheme: dark)")
-        .addEventListener("change", this.themelistener);
-      window
-        .matchMedia("(prefers-color-scheme: light)")
-        .addEventListener("change", this.themelistener);
-    }
-    /* - get user's system theme */
-
-    /* + get user's permission for geo */
-    if ("geolocation" in navigator) {   
-      navigator.permissions.query({ name: "geolocation" }).then((result) => {
-        this.setgeopermission(result);
-
-        result.addEventListener("change", () => {
-          this.setgeopermission(result);
-        });
-      });
-    }
-    /* - get user's permission for geo */
-
-
-    /* + Operate with a map */
-
-    /* retrieve coordinates */
-    this.setgeo()
-    .then(async () => {
-      const map = init([this.lat, this.lng], this.zoom, this.theme);
+    async loadMap() {
+      this.geoisloading = false;
+      
+      this.map = init([this.lat, this.lng], this.zoom, this.theme);
       this.relocatemap(this.lat, this.lng, this.zoom, "reload");
 
-      if (this.userposition) {
-        drawuser(this.userposition, this.zoom);
-      }
-
-      map.on("zoomend", (e) => {
+      this.map.on("zoomend", (e) => {
         this.relocatemap(
           e.target.getCenter().lat.toFixed(4),
           e.target.getCenter().lng.toFixed(4),
@@ -221,7 +243,7 @@ export default {
         );
       });
 
-      map.on("moveend", (e) => {
+      this.map.on("moveend", (e) => {
         /* setTimeout for mobiles (whne swiping up app, it causes unpleasant map moving before closing app) */
         setTimeout( () => {
           this.relocatemap(
@@ -237,21 +259,60 @@ export default {
         }, 50)
       });
 
-      initMarkers(map, this.measuretype, (data) => {
+      initMarkers(this.map, this.measuretype, (data) => {
         this.$emit("clickMarker", data);
       });
 
       if (this.provider === "realtime") {
         await initWind();
       }
-    });
-    // .catch(() => {
-    //   console.error('map drawing error');
-    // });
-    /* - Operate with a map */
 
-    /* get bookmarks and listenning for broadcast from DB */
-    await this.store.idbBookmarkGet();
+      /* get bookmarks and listenning for broadcast from DB */
+      await this.store.idbBookmarkGet();
+    }
+  },
+
+  unmounted() {
+    removeMap();
+  },
+  watch: {
+    geoisloading(v) {
+      console.log('geoisloading changed', v)
+    },
+    geomsg(v) {
+      console.log('geomsg changed', v)
+    }
+  },
+
+  async mounted() {
+
+    /* + get user's system theme */
+    if (window.matchMedia) {
+      window
+        .matchMedia("(prefers-color-scheme: dark)")
+        .addEventListener("change", this.themelistener);
+      window
+        .matchMedia("(prefers-color-scheme: light)")
+        .addEventListener("change", this.themelistener);
+    }
+    /* - get user's system theme */
+
+
+    /* + Operate with a map */
+
+    /* retrieve coordinates */
+    this.setgeo()
+    .then(async (m) => {
+      this.opengeotip(m);
+      this.loadMap();
+    })
+    .catch((m) => {
+      /* Если нет возможности "geolocation", то проверяем локальное хранилище */
+      this.opengeotip(m + ', setting up default position...');
+      this.loadMap();
+    });
+    /* - Operate with a map */
+    
   },
 };
 </script>
@@ -332,6 +393,10 @@ export default {
   width: 40px;
   height: 40px;
 }
+
+.popoovergeo-tipclose.svg-inline--fa path {
+  fill: var(--color-light) !important;
+}
 </style>
 
 <style scoped>
@@ -348,5 +413,59 @@ export default {
 
 .mapcontainer.inactive {
   filter: grayscale(100%);
+}
+
+.popoovergeo {
+  position: relative;
+}
+
+.popoovergeo-tip {
+  --gettime: v-bind('geomsgopenedtime');
+  --openedtime: calc(var(--gettime)/1000 * 1s);
+  position: absolute;
+  padding: 5px 25px 5px 10px;
+  background-color: color-mix(in srgb, var(--color-dark) 70%, transparent);
+  color: var(--color-light);
+  backdrop-filter: blur(5px);
+  font-weight: bold;
+  border-radius: 2px;
+  bottom: calc(var(--app-inputheight) + 10px);
+  width: 220px;
+  right: -10px;
+  font-size: 0.9em;
+}
+
+/* .popoovergeo-tip.opened {
+  animation: fadeOut 0.3s linear var(--openedtime) forwards;
+} */
+
+.popoovergeo-tip:before {
+  content: "";
+  height: 2px;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: var(--color-light);
+  animation: rolldownLeft var(--openedtime) linear 0s forwards;
+  transform-origin: 0 50%;
+}
+
+.popoovergeo-tip:after {
+  content: "";
+  width: 0; 
+  height: 0; 
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid color-mix(in srgb, var(--color-dark) 70%, transparent);
+  position: absolute;
+  bottom: -10px;
+  right: 15px;
+}
+
+.popoovergeo-tipclose {
+  position: absolute;
+  top: 5px;
+  right: 5px;
 }
 </style>

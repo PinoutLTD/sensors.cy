@@ -3,9 +3,14 @@ import { toFixed } from "./tools";
 export default {
   label: "Noise Avg.",
   name: {
-    en: "Noise average",
-    ru: "Шум (среднее)",
-    el: "Θόρυβος (μέσος όρος)",
+    en: "Noise Avg.",
+    ru: "Шум Средн.",
+    el: "Θόρυβος (μέσος όρος).",
+  },
+  nameshort: {
+    en: "Noise Avg.",
+    ru: "Шум Средн.",
+    el: "Θόρυβος (μέσος όρος).",
   },
   unit: "dB",
   range: [0, 40, 70, 80, 100],
