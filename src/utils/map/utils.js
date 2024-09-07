@@ -3,7 +3,7 @@ import axios from "axios";
 export function getCityByPos(lat, lon, language = "en") {
   return axios
     .get(
-      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=${language}`
+      `https://nominatim.osm.sensors.social/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=${language}`
     )
     .then((r) => {
       if (r.data.address) {
@@ -24,7 +24,7 @@ export function getCityByPos(lat, lon, language = "en") {
 export function getAddressByPos(lat, lon, language = "en") {
   return axios
     .get(
-      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=${language}`
+      `https://nominatim.osm.sensors.social/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=${language}`
     )
     .then((r) => {
       if (r.data.address) {
