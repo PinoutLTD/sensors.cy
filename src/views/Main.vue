@@ -3,7 +3,11 @@
   <Header />
 
   <template v-if="point">
-    <MessagePopup v-if="point.data.message" @close="handlerClose" :data="point.data" />
+    <MessagePopup
+      v-if="point.measurement && point.measurement.message"
+      @close="handlerClose"
+      :data="point.measurement"
+    />
     <SensorPopup
       v-else
       :currentProvider="provider"
@@ -12,6 +16,7 @@
       @modal="handlerModal"
       @close="handlerClose"
       @history="handlerHistoryLog"
+      :startTime="start"
     />
   </template>
 
@@ -19,6 +24,7 @@
     :measuretype="type"
     :historyready="canHistory"
     :historyhandler="handlerHistory"
+    :isLoad="isLoad"
     @clickMarker="handlerClick"
   />
 
@@ -83,6 +89,9 @@ export default {
         timeout: 5000,
         maximumAge: 0,
       },
+      start: null,
+      end: null,
+      isLoad: false,
     };
   },
   computed: {
@@ -112,6 +121,9 @@ export default {
   },
   methods: {
     async handlerHistory({ start, end }) {
+      this.isLoad = true;
+      this.start = start;
+      this.end = end;
       this.status = "history";
       this.providerObj.watch(null);
       this.handlerClose();
@@ -135,6 +147,7 @@ export default {
       for (const message in messages) {
         this.handlerNewPoint(messages[message]);
       }
+      this.isLoad = false;
     },
     async handlerNewPoint(point) {
       if (!point.model || !markers.isReadyLayers()) {
@@ -174,7 +187,9 @@ export default {
       }
     },
     async handlerClick(point) {
-      let log;
+      this.isLoad = true;
+      this.point = null;
+      let log = [];
       if (this.status === "history") {
         log = await this.providerObj.getHistoryPeriodBySensor(
           point.sensor_id,
@@ -194,6 +209,7 @@ export default {
         address,
         log: [...log],
       };
+      this.isLoad = false;
     },
     async handlerHistoryLog({ sensor_id, start, end }) {
       if (this.status === "history") {

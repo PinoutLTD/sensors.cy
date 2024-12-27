@@ -12,7 +12,12 @@
       <section class="flexline space-between">
         <div class="flexline">
           <input v-if="!realtime" type="date" v-model="start" :max="maxDate" />
-          <Bookmark v-if="sensor_id" :address="address?.address && address?.address.join(', ')" :link="sensor_id" :geo="geo" />
+          <Bookmark
+            v-if="sensor_id"
+            :address="address?.address && address?.address.join(', ')"
+            :link="sensor_id"
+            :geo="geo"
+          />
         </div>
         <button @click="shareData" class="button">
           <font-awesome-icon icon="fa-solid fa-share-from-square" v-if="!shared" />
@@ -37,7 +42,8 @@
       </section>
 
       <section>
-        <Chart :point="point" :log="log" />
+        <div v-if="isLoad">{{ $t("isLoad") }}</div>
+        <Chart v-else :point="point" :log="log" />
       </section>
 
       <section>
@@ -82,7 +88,7 @@
           </div>
         </div>
       </section>
-      
+
       <section v-if="units && scales && scales.length > 0">
         <h3>{{ $t("scales.title") }}</h3>
         <div class="scalegrid">
@@ -137,7 +143,7 @@ import Copy from "./Copy.vue";
 
 export default {
   emits: ["close"],
-  props: ["type", "point"],
+  props: ["type", "point", "startTime"],
   components: { Chart, Copy, Bookmark },
   data() {
     return {
@@ -150,7 +156,8 @@ export default {
       provider: this.$route.params.provider,
       rttime: null /* used for realtime view */,
       rtdata: [] /* used for realtime view */,
-      shared: false, /* status for share button */
+      shared: false /* status for share button */,
+      isLoad: false,
     };
   },
   computed: {
@@ -186,11 +193,13 @@ export default {
 
     addressformatted() {
       let bufer = "";
-      if (this.address.country) {
-        bufer += this.address.country;
-      }
-      if (this.address.address.length > 0) {
-        bufer += ", " + this.address.address.join(", ");
+      if (this.address) {
+        if (this.address.country) {
+          bufer += this.address.country;
+        }
+        if (this.address.address.length > 0) {
+          bufer += ", " + this.address.address.join(", ");
+        }
       }
       return bufer;
     },
@@ -288,9 +297,11 @@ export default {
       /* + Possible units for the sensor */
       let measures = [];
       Object.values(this.log).forEach((item) => {
-        Object.keys(item.data).forEach((unit) => {
-          measures.push(unit.toLowerCase());
-        });
+        if (item.data) {
+          Object.keys(item.data).forEach((unit) => {
+            measures.push(unit.toLowerCase());
+          });
+        }
       });
       return [...new Set(measures.flat())];
     },
@@ -312,27 +323,30 @@ export default {
   },
   methods: {
     shareData() {
-      if(!navigator.share) {
-        navigator.clipboard.writeText(this.linkSensor).then( () => {
-          this.shared = true;
-          setTimeout(() => {
-            this.shared = false;
-          }, 5000)
-        }).catch( e => {
-          console.log('not coppied', e);
-        })
+      if (!navigator.share) {
+        navigator.clipboard
+          .writeText(this.linkSensor)
+          .then(() => {
+            this.shared = true;
+            setTimeout(() => {
+              this.shared = false;
+            }, 5000);
+          })
+          .catch((e) => {
+            console.log("not coppied", e);
+          });
       } else {
         navigator.share({
           title: config.TITLE,
           url: this.linkSensor || this.link,
         });
       }
-      
     },
     getHistory() {
       if (this.realtime) {
         return;
       }
+      this.isLoad = true;
       this.$emit("history", {
         sensor_id: this.sensor_id,
         start: this.startTimestamp,
@@ -385,16 +399,15 @@ export default {
     },
 
     closesensor() {
-
-      /* this is for removing sensor id, it goes from dummy reload in bookmark, 
+      /* this is for removing sensor id, it goes from dummy reload in bookmark,
       that I needed as couldn't manage proper handle for the openning - @positivecrash */
       const urlstr = window.location.href;
-      if(urlstr.includes(this.sensor_id)){
+      if (urlstr.includes(this.sensor_id)) {
         const u = urlstr.replace(this.sensor_id, "");
         window.location.href = u;
       }
-    
-      this.$emit('close');
+
+      this.$emit("close");
     },
   },
   /* Causes some error, needs to be checked */
@@ -419,9 +432,15 @@ export default {
     },
     log() {
       this.updatert();
+
+      this.isLoad = false;
     },
   },
   mounted() {
+    this.start = this.startTime
+      ? moment.unix(this.startTime).format("YYYY-MM-DD")
+      : moment().format("YYYY-MM-DD");
+
     this.updatert();
   },
 };

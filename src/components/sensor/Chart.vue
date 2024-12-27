@@ -1,10 +1,21 @@
 <template>
-  <Chart :options="chartOptions" ref="chart"></Chart>
+  <Chart :constructor-type="'stockChart'" :options="chartOptions" ref="chart"></Chart>
 </template>
 
 <script>
+import Highcharts from "highcharts";
+import { Chart } from "highcharts-vue";
+import stockInit from "highcharts/modules/stock";
+import config from "../../config";
 import unitsettings from "../../measurements";
-import { Chart } from 'highcharts-vue';
+
+Highcharts.seriesTypes.spline.prototype.drawLegendSymbol = function (legend, item) {
+  this.options.marker.enabled = true;
+  Highcharts.LegendSymbol.lineMarker?.call(this, legend, item);
+  this.options.marker.enabled = false;
+};
+
+stockInit(Highcharts);
 
 export default {
   components: { Chart },
@@ -14,77 +25,72 @@ export default {
       chartOptions: {},
       provider: this.$route.params.provider,
       chartObj: null,
-    }
+    };
   },
   computed: {
-
     series() {
-      const data = this.log.map(e => { return [e.timestamp, e.data] });
-      let result = [];
-
-      data.forEach(e => {
-
-        const timestamp = e[0] ?? null;
-
-        for (const [unit, unitdata] of Object.entries(e[1])) {
-
-          /* check/add unit name */
-          if(!result.find(r => r.name.toLowerCase() === unit.toLowerCase())) {
-            result.push({name: unit.toLowerCase()});
-          }
-
-          /* find unit by name to add data */
-          const unitind = result.findIndex(e => e.name.toLowerCase() === unit.toLowerCase());
-
-          if(unitind > -1 && unitdata) {
-
-            /* + add time & measures numbers */
-            if(!result[unitind]?.data) {
-              result[unitind].data = [];
+      const unitsettingsLowerCase = Object.fromEntries(
+        Object.entries(unitsettings).map(([k, v]) => [k.toLowerCase(), v])
+      );
+      const result = [];
+      for (const item of this.log) {
+        if (item.data) {
+          for (let keyname of Object.keys(item.data)) {
+            keyname = keyname.toLowerCase();
+            const i = result.findIndex((m) => m.name === keyname);
+            if (i >= 0) {
+              result[i].data.push([item.timestamp * 1000, item.data[keyname]]);
+            } else {
+              result.push({
+                name: keyname,
+                data: [[item.timestamp * 1000, parseFloat(item.data[keyname])]],
+                zones: unitsettingsLowerCase[keyname]?.zones,
+                visible: true,
+                dataGrouping: {
+                  enabled: false,
+                },
+              });
             }
-            result[unitind].data.push([timestamp * 1000, parseFloat(unitdata)]);
-            /* - add time & measures numbers */
-
-            /* + add color zones */
-            for (const [unitset, unitdataset] of Object.entries(unitsettings)) {
-              if(unit.toLowerCase() === unitset.toLowerCase()) {
-                if(unitdataset?.zones && !result[unitind]?.zones) {
-                  result[unitind].zones = unitdataset.zones
-                }
-              }
-            }
-            /* - add color zones */
-
           }
         }
-      });
-
+      }
+      for (const measurement of result) {
+        if (measurement.data.length > config.SERIES_MAX_VISIBLE) {
+          measurement.visible = false;
+          measurement.dataGrouping = {
+            approximation: "high",
+          };
+        }
+      }
       return result;
     },
 
     startpoint() {
-      if(this.provider === 'realtime'){
+      if (this.provider === "realtime") {
         return Date.now();
       } else {
         let start = new Date();
-        start.setHours(0,0,0,0);
+        start.setHours(0, 0, 0, 0);
         return start;
       }
-    }
-    
+    },
   },
   watch: {
     series(v) {
-
       /* Update all series */
       /* Maybe better to make here different adding:
       realtime - addPoint
       remote - setData */
 
       v.forEach((newdata, i) => {
-        this.chartObj.series[i].setData(newdata.data, false);
-      })
-      
+        const id = this.chartObj.series.findIndex((m) => m.name === newdata.name);
+        if (id >= 0) {
+          this.chartObj.series[i].setData(newdata.data, false);
+        } else {
+          this.chartObj.addSeries(newdata);
+        }
+      });
+
       this.chartObj.redraw();
     },
   },
@@ -94,82 +100,104 @@ export default {
     this.chartObj = chart;
 
     this.chartOptions = {
-        chart: {
-          type: "spline",
-          height: 400,
-          /* for debugging */
-          // events: {
-          //   addSeries: (e) => {
-          //     console.log('series added', e);
-          //   },
-          //   redraw: (e) => {
-          //     console.log('series redraw', e);
-          //   },
-          // }
-        },
-        title: {
-          text: "",
-        },
-        time: {
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
-        },
-        series: this.series,
-        xAxis: {
-          title: false,
-          type: 'datetime',
-          labels: {
-            overflow: 'justify',
-            /* https://api.highcharts.com/highcharts/xAxis.dateTimeLabelFormats */
-            format: '{value: %H:%M }'
-          }
-        },
-        yAxis: {
-          title: false,
-        },
-        plotOptions: {
-          
-          series: {
-            lineWidth: 2,
-            states: {
-                hover: {
-                    lineWidth: 3
-                }
-            },
-            pointStart: this.startpoint,
-            // marker: {
-            //     enabled: false
-            // },
-            dataLabels: {
-              enabled: true,
-              allowOverlap: true,
-              formatter() {
-                if (this.point.index == this.series.points.length - 1) {
-                  return `<span style="color:${this.color}">${this.series.name}</span>`
-                }
-              }
-            }
+      legend: {
+        enabled: true,
+      },
+      rangeSelector: {
+        inputEnabled: false,
+        buttons: [
+          {
+            type: "all",
+            text: "All",
+            title: "View all",
           },
-        
+        ],
+      },
+      chart: {
+        type: "spline",
+        height: 400,
+        /* for debugging */
+        // events: {
+        //   addSeries: (e) => {
+        //     console.log('series added', e);
+        //   },
+        //   redraw: (e) => {
+        //     console.log('series redraw', e);
+        //   },
+        // }
+      },
+      title: {
+        text: "",
+      },
+      time: {
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      },
+      series: this.series,
+      xAxis: {
+        title: false,
+        type: "datetime",
+        labels: {
+          overflow: "justify",
+          /* https://api.highcharts.com/highcharts/xAxis.dateTimeLabelFormats */
+          format: "{value: %H:%M }",
         },
-      }
-    }
-}
+      },
+      yAxis: {
+        title: false,
+      },
+      tooltip: {
+        valueDecimals: 2,
+      },
+      plotOptions: {
+        series: {
+          dataGrouping: {
+            enabled: true,
+            units: [["minute", [5]]],
+          },
+        },
+      },
+      // plotOptions: {
+      //   series: {
+      //     lineWidth: 2,
+      //     states: {
+      //       hover: {
+      //         lineWidth: 3,
+      //       },
+      //     },
+      //     pointStart: this.startpoint,
+      //     // marker: {
+      //     //     enabled: false
+      //     // },
+      //     dataLabels: {
+      //       enabled: true,
+      //       allowOverlap: true,
+      //       formatter() {
+      //         if (this.point.index == this.series.points.length - 1) {
+      //           return `<span style="color:${this.color}">${this.series.name}</span>`;
+      //         }
+      //       },
+      //     },
+      //   },
+      // },
+    };
+  },
+};
 </script>
 
 <style>
-
 /* rewrite some Highcharts styles */
 .highcharts-legend-item {
   font-weight: 900;
 }
 
-.highcharts-legend-item .highcharts-graph, 
+.highcharts-legend-item .highcharts-graph,
 .highcharts-legend-item .highcharts-point {
   stroke: #000 !important;
 }
 
 .highcharts-legend-item .highcharts-point {
   fill: #000 !important;
+  stroke-width: 2;
 }
 
 .highcharts-legend-item-hidden text {
@@ -178,7 +206,7 @@ export default {
   text-decoration: none !important;
 }
 
-.highcharts-legend-item-hidden .highcharts-graph, 
+.highcharts-legend-item-hidden .highcharts-graph,
 .highcharts-legend-item-hidden .highcharts-point {
   stroke: #999 !important;
 }
@@ -186,5 +214,4 @@ export default {
 .highcharts-legend-item-hidden .highcharts-point {
   fill: #999 !important;
 }
-
 </style>

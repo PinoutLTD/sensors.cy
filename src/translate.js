@@ -217,6 +217,7 @@ export default {
     },
     showlocation: "Show my location",
     locationloading: "Trying to get your location",
+    isLoad: "Load...",
   },
   ru: {
     header: {
@@ -444,6 +445,7 @@ export default {
     },
     showlocation: "Показать моё местоположение",
     locationloading: "Пытаемся получить вашу геопозицию",
+    isLoad: "Загрузка ...",
   },
   el: {
     header: {
