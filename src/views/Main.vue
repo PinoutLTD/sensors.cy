@@ -16,6 +16,7 @@
       @modal="handlerModal"
       @close="handlerClose"
       @history="handlerHistoryLog"
+      :startTime="start"
     />
   </template>
 
@@ -23,6 +24,7 @@
     :measuretype="type"
     :historyready="canHistory"
     :historyhandler="handlerHistory"
+    :isLoad="isLoad"
     @clickMarker="handlerClick"
   />
 
@@ -87,6 +89,9 @@ export default {
         timeout: 5000,
         maximumAge: 0,
       },
+      start: null,
+      end: null,
+      isLoad: false,
     };
   },
   computed: {
@@ -116,6 +121,9 @@ export default {
   },
   methods: {
     async handlerHistory({ start, end }) {
+      this.isLoad = true;
+      this.start = start;
+      this.end = end;
       this.status = "history";
       this.providerObj.watch(null);
       this.handlerClose();
@@ -139,6 +147,7 @@ export default {
       for (const message in messages) {
         this.handlerNewPoint(messages[message]);
       }
+      this.isLoad = false;
     },
     async handlerNewPoint(point) {
       if (!point.model || !markers.isReadyLayers()) {
@@ -178,6 +187,7 @@ export default {
       }
     },
     async handlerClick(point) {
+      this.isLoad = true;
       this.point = null;
       let log = [];
       if (this.status === "history") {
@@ -199,6 +209,7 @@ export default {
         address,
         log: [...log],
       };
+      this.isLoad = false;
     },
     async handlerHistoryLog({ sensor_id, start, end }) {
       if (this.status === "history") {
@@ -297,12 +308,6 @@ export default {
     } else {
       this.providerObj = new providers.Libp2p(config.LIBP2P);
     }
-
-    const result = await providers.Remote.getMeasurements(
-      moment().startOf("day").format("X"),
-      moment().format("X")
-    );
-    console.log(result);
 
     this.providerObj.ready().then(() => {
       this.providerReady = true;

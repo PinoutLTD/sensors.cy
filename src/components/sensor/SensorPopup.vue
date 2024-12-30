@@ -42,7 +42,8 @@
       </section>
 
       <section>
-        <Chart :point="point" :log="log" />
+        <div v-if="isLoad">{{ $t("isLoad") }}</div>
+        <Chart v-else :point="point" :log="log" />
       </section>
 
       <section>
@@ -142,7 +143,7 @@ import Copy from "./Copy.vue";
 
 export default {
   emits: ["close"],
-  props: ["type", "point"],
+  props: ["type", "point", "startTime"],
   components: { Chart, Copy, Bookmark },
   data() {
     return {
@@ -156,6 +157,7 @@ export default {
       rttime: null /* used for realtime view */,
       rtdata: [] /* used for realtime view */,
       shared: false /* status for share button */,
+      isLoad: false,
     };
   },
   computed: {
@@ -344,6 +346,7 @@ export default {
       if (this.realtime) {
         return;
       }
+      this.isLoad = true;
       this.$emit("history", {
         sensor_id: this.sensor_id,
         start: this.startTimestamp,
@@ -429,9 +432,15 @@ export default {
     },
     log() {
       this.updatert();
+
+      this.isLoad = false;
     },
   },
   mounted() {
+    this.start = this.startTime
+      ? moment.unix(this.startTime).format("YYYY-MM-DD")
+      : moment().format("YYYY-MM-DD");
+
     this.updatert();
   },
 };
