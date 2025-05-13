@@ -4,11 +4,13 @@ export default {
   label: "Noise",
   name: {
     en: "Noise",
-    ru: "Шум"
+    ru: "Шум",
+    el: "Θόρυβος"
   },
   nameshort: {
     en: "Noise",
-    ru: "Шум"
+    ru: "Шум",
+    el: "Θόρυβος"
   },
   unit: "dB",
   range: [0, 40, 70, 80, 100],
@@ -18,7 +20,8 @@ export default {
       color: "#60bc2a",
       label: {
         en: "Faint",
-        ru: "Тихо"
+        ru: "Тихо",
+        el: "Λιποθυμία"
       }
     },
     {
@@ -26,7 +29,8 @@ export default {
       color: "#12bfcc",
       label: {
         en: "Moderate",
-        ru: "Удовлетворительно"
+        ru: "Удовлетворительно",
+        el: "Μέτριος"
       }
     },
     {
@@ -34,7 +38,8 @@ export default {
       color: "#ff9d00",
       label: {
         en: "Loud",
-        ru: "Шумно"
+        ru: "Шумно",
+        el: "Μεγαλόφωνος"
       }
     },
     {
@@ -42,14 +47,16 @@ export default {
       color: "#ff4d00",
       label: {
         en: "Very loud",
-        ru: "Очень шумно"
+        ru: "Очень шумно",
+        el: "Πολύ δυνατά"
       }
     },
     {
       color: "#7a00da",
       label: {
         en: "Extremely loud",
-        ru: "Экстремально шумно"
+        ru: "Экстремально шумно",
+        el: "Εξαιρετικά δυνατός"
       }
     },
   ],

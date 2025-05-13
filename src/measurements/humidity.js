@@ -3,11 +3,12 @@ export default {
   name: {
     en: "Humidity",
     ru: "Влажность",
-    el: "Υγρασία",
+    el: "Υγρασία"
   },
   nameshort: {
     en: "Humidity",
-    ru: "Влажность"
+    ru: "Влажность",
+    el: "Υγρασία"
   },
   unit: "%",
   chartColor: "#6fd3ff",
@@ -19,7 +20,7 @@ export default {
       label: {
         en: "Very dry",
         ru: "Очень сухо",
-        el: "Πολύ ξηρή",
+        el: "Πολύ ξηρό"
       }
     },
     {
@@ -28,7 +29,7 @@ export default {
       label: {
         en: "Dry",
         ru: "Сухо",
-        el: "Ξηρή",
+        el: "Ξηρός"
       }
     },
     {
@@ -37,7 +38,7 @@ export default {
       label: {
         en: "Comfortable",
         ru: "Комфортно",
-        el: "Άνετη",
+        el: "Ανετος"
       }
     },
     {
@@ -46,7 +47,7 @@ export default {
       label: {
         en: "Humid",
         ru: "Влажно",
-        el: "Υγρός",
+        el: "Υγρός"
       }
     },
     {
@@ -54,7 +55,7 @@ export default {
       label: {
         en: "Very humid",
         ru: "Очень влажно",
-        el: "Πολύ υγρό",
+        el: "Πολύ υγρό"
       }
     },
   ],

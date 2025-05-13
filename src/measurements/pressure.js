@@ -3,11 +3,12 @@ export default {
   name: {
     en: "Atmospheric pressure",
     ru: "Атмосферное давление",
-    el: "Ατμοσφαιρική πίεση",
+    el: "Ατμοσφαιρική πίεση"
   },
   nameshort: {
     en: "Pressure",
-    ru: "Давление"
+    ru: "Давление",
+    el: "Πίεση"
   },
   unit: "mmHg",
 };

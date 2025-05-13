@@ -13,7 +13,7 @@ export default {
       label: {
         en: "Good",
         ru: "Хорошо",
-        el: "Πρόστιμο",
+        el: "Καλός"
       }
     },
     {
@@ -22,7 +22,7 @@ export default {
       label: {
         en: "Satisfyingly",
         ru: "Удовлетворительно",
-        el: "Ικανοποιητικά",
+        el: "Ικανοποιητικώς"
       }
     },
     {
@@ -31,7 +31,7 @@ export default {
       label: {
         en: "Poor",
         ru: "Плохо",
-        el: "Κακώς",
+        el: "Φτωχός"
       }
     },
     {
@@ -40,7 +40,7 @@ export default {
       label: {
         en: "Very poor",
         ru: "Очень плохо",
-        el: "Πολύ κακό",
+        el: "Πάμπτωχος"
       }
     },
     {
@@ -48,7 +48,7 @@ export default {
       label: {
         en: "Unacceptable",
         ru: "Неприемлемо",
-        el: "Απαράδεκτος",
+        el: "Απαράδεκτος"
       }
     },
   ],

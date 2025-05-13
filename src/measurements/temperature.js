@@ -5,11 +5,12 @@ export default {
   name: {
     en: "Temperature",
     ru: "Температура",
-    el: "Θερμοκρασία",
+    el: "Θερμοκρασία"
   },
   nameshort: {
     en: "Temperature",
-    ru: "Температура"
+    ru: "Температура",
+    el: "Θερμοκρασία"
   },
   unit: "℃",
   chartColor: "#2d7ac7",
@@ -22,7 +23,7 @@ export default {
       label: {
         en: "Very cold",
         ru: "Очень холодно",
-        el: "Πολύ κρύο",
+        el: "Πολύ κρύο"
       }
     },
     {
@@ -31,7 +32,7 @@ export default {
       label: {
         en: "Cold",
         ru: "Холодно",
-        el: "Κρύο",
+        el: "Κρύο"
       }
     },
     {
@@ -40,7 +41,7 @@ export default {
       label: {
         en: "Cool",
         ru: "Прохладно",
-        el: "Ψυχρός",
+        el: "Δροσερός"
       }
     },
     {
@@ -49,7 +50,7 @@ export default {
       label: {
         en: "Warm",
         ru: "Тепло",
-        el: "Ζεστό",
+        el: "Ζεστός"
       }
     },
     {
@@ -57,7 +58,7 @@ export default {
       label: {
         en: "Hot",
         ru: "Жарко",
-        el: "Πολύ ζεστό",
+        el: "Καυτό"
       }
     },
   ],
