@@ -5,11 +5,12 @@ export default {
   name: {
     en: "Ammonia",
     ru: "Аммиак",
-    el: "Αμμωνία",
+    el: "Αμμωνία"
   },
   nameshort: {
     en: "Ammonia",
-    ru: "Аммиак"
+    ru: "Аммиак",
+    el: "Αμμωνία"
   },
   unit: "mg/m3",
   icon: "vial-virus",
@@ -23,7 +24,7 @@ export default {
       label: {
         en: "Good",
         ru: "Хорошо",
-        el: "Πρόστιμο",
+        el: "Καλός"
       }
     },
     {
@@ -32,7 +33,7 @@ export default {
       label: {
         en: "Satisfyingly",
         ru: "Удовлетворительно",
-        el: "Ικανοποιητικά",
+        el: "Ικανοποιητικώς"
       }
     },
     {
@@ -40,7 +41,7 @@ export default {
       label: {
         en: "Poor",
         ru: "Плохо",
-        el: "Κακώς",
+        el: "Φτωχός"
       }
     },
   ],

@@ -5,7 +5,7 @@ export default {
   name: {
     en: "Nitrogen Dioxide",
     ru: "Диоксид азота",
-    el: "Διοξείδιο του αζώτου",
+    el: "Διοξείδιο του αζώτου"
   },
   unit: "mg/m3",
   chartColor: "#d4dd53",
@@ -18,7 +18,7 @@ export default {
       label: {
         en: "Good",
         ru: "Хорошо",
-        el: "Πρόστιμο",
+        el: "Καλός"
       }
     },
     {
@@ -27,7 +27,7 @@ export default {
       label: {
         en: "Satisfyingly",
         ru: "Удовлетворительно",
-        el: "Ικανοποιητικά",
+        el: "Ικανοποιητικώς"
       }
     },
     {
@@ -35,7 +35,7 @@ export default {
       label: {
         en: "Poor",
         ru: "Плохо",
-        el: "Κακώς",
+        el: "Φτωχός"
       }
     },
   ],

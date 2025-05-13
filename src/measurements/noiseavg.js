@@ -5,12 +5,12 @@ export default {
   name: {
     en: "Noise Avg.",
     ru: "Шум Средн.",
-    el: "Θόρυβος (μέσος όρος).",
+    el: "Μέσος όρος θορύβου"
   },
   nameshort: {
     en: "Noise Avg.",
     ru: "Шум Средн.",
-    el: "Θόρυβος (μέσος όρος).",
+    el: "Μέσος όρος θορύβου"
   },
   unit: "dB",
   range: [0, 40, 70, 80, 100],
@@ -21,7 +21,7 @@ export default {
       label: {
         en: "Faint",
         ru: "Тихо",
-        el: "Ησυχια",
+        el: "Λιποθυμία"
       }
     },
     {
@@ -30,7 +30,7 @@ export default {
       label: {
         en: "Moderate",
         ru: "Удовлетворительно",
-        el: "Ικανοποιητικά",
+        el: "Μέτριος"
       }
     },
     {
@@ -39,7 +39,7 @@ export default {
       label: {
         en: "Loud",
         ru: "Шумно",
-        el: "Θορυβώδης",
+        el: "Μεγαλόφωνος"
       }
     },
     {
@@ -48,7 +48,7 @@ export default {
       label: {
         en: "Very loud",
         ru: "Очень шумно",
-        el: "Πολύ θορυβώδες",
+        el: "Πολύ δυνατά"
       }
     },
     {
@@ -56,7 +56,7 @@ export default {
       label: {
         en: "Extremely loud",
         ru: "Экстремально шумно",
-        el: "Εξαιρετικά θορυβώδες",
+        el: "Εξαιρετικά δυνατός"
       }
     },
   ],

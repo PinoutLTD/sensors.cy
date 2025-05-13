@@ -1,12 +1,11 @@
+import config, { sensors } from "@config";
 import Queue from "js-queue";
 import L from "leaflet";
 import "leaflet-arrowheads";
 import "leaflet.markercluster";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
-import config from "../../config";
 import { getMeasurementByName } from "../../measurements/tools";
-import sensors from "../../sensors";
 import generate, { getColor, getColorDarkenRGB, getColorRGB } from "../../utils/color";
 
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
@@ -358,6 +357,14 @@ function markercolor(value) {
 }
 
 async function addMarker(point) {
+  // Проверка координат: если они близки к 0, пропускаем создание маркера
+  const tolerance = 0.001;
+  const lat = Number(point.geo.lat);
+  const lng = Number(point.geo.lng);
+  if (Math.abs(lat) < tolerance && Math.abs(lng) < tolerance) {
+    return; // Сенсор с нулевой геопозицией — не добавляем маркер
+  }
+  
   const colors = {
     basic: "#a1a1a1",
     border: "#999",
@@ -469,6 +476,14 @@ export async function hidePath(sensor_id) {
 }
 
 async function addMarkerUser(point) {
+  // Проверка координат: если они близки к 0, пропускаем создание маркера
+  const tolerance = 0.001;
+  const lat = Number(point.geo.lat);
+  const lng = Number(point.geo.lng);
+  if (Math.abs(lat) < tolerance && Math.abs(lng) < tolerance) {
+    return;
+  }
+
   const colors = {
     basic: "#f99981",
     border: "#999",

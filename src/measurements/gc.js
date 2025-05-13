@@ -2,12 +2,13 @@ export default {
   label: "GC",
   name: {
     en: "Background radiation",
-    ru: "Радиационный фон"
+    ru: "Радиационный фон",
+    el: "Ακτινοβολία υποβάθρου"
   },
   nameshort: {
     en: "Radiation",
     ru: "Радиация",
-    el: "Ακτινοβολία",
+    el: "Ακτινοβολία"
   },
   unit: "μR/h",
   chartColor: "#e99152",
@@ -19,7 +20,7 @@ export default {
       label: {
         en: "Background",
         ru: "Фоновая",
-        el: "Φόντου",
+        el: "Φόντο"
       }
     },
     {
@@ -28,7 +29,7 @@ export default {
       label: {
         en: "Moderate",
         ru: "Невысокая",
-        el: "Χαμηλή",
+        el: "Μέτριος"
       }
     },
     {
@@ -37,7 +38,7 @@ export default {
       label: {
         en: "Elevated",
         ru: "Повышенная",
-        el: "Αυξημένη",
+        el: "Υπερυψωμένο"
       }
     },
     {
@@ -45,7 +46,7 @@ export default {
       label: {
         en: "High",
         ru: "Высокая",
-        el: "Υψηλή",
+        el: "Ψηλά"
       }
     },
   ],

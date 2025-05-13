@@ -15,7 +15,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v1
         with:
-          node-version: "18.17.x"
+          node-version: "20.x"
 
       - name: Get yarn cache
         id: yarn-cache
@@ -30,6 +30,8 @@ jobs:
             ${{ runner.os }}-website-
       - run: yarn install --frozen-lockfile
       - run: yarn build
+        env:
+          VITE_CONFIG_ENV: ${{ vars.VITE_CONFIG_ENV }}
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
