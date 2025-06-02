@@ -90,7 +90,7 @@ export default {
     },
 
     relocatemap(lat, lng, zoom, type = "default") {
-      console.log("relocatemap", lat, lng, zoom, type);
+      console.debug("relocatemap", lat, lng, zoom, type);
       const options = {
         name: "main",
         params: {
@@ -306,10 +306,10 @@ export default {
   },
   watch: {
     geoisloading(v) {
-      console.log("geoisloading changed", v);
+      console.debug("geoisloading changed", v);
     },
     geomsg(v) {
-      console.log("geomsg changed", v);
+      console.debug("geomsg changed", v);
     },
   },
 
@@ -418,6 +418,14 @@ export default {
 .marker-icon-msg {
   width: 40px;
   height: 40px;
+}
+
+.marker-cluster-circle.sensor-bookmarked {
+  background-image: url("data:image/svg+xml,%3Csvg class='svg-inline--fa fa-bookmark' aria-hidden='true' focusable='false' data-prefix='fas' data-icon='bookmark' role='img' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 384 512' data-v-fb71281d=''%3E%3Cpath class='' fill='white' d='M0 48V487.7C0 501.1 10.9 512 24.3 512c5 0 9.9-1.5 14-4.4L192 400 345.7 507.6c4.1 2.9 9 4.4 14 4.4c13.4 0 24.3-10.9 24.3-24.3V48c0-26.5-21.5-48-48-48H48C21.5 0 0 21.5 0 48z'%3E%3C/path%3E%3C/svg%3E");
+  background-size: 10px 10px;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: 2px solid #fff !important;
 }
 
 .popoovergeo-tipclose.svg-inline--fa path {

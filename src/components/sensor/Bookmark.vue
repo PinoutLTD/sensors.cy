@@ -60,6 +60,8 @@ export default {
 
     async addbookmark() {
       const bookmark = await this.findbookmark();
+      const sensorElement = document.querySelector(`[data-id="${this.$props.id}"]`);
+
 
       if (bookmark) {
         if (this.bookmarkid) {
@@ -72,7 +74,7 @@ export default {
               const request = store.get(this.bookmarkid);
 
               request.addEventListener("error", (e) => {
-                console.log(e);
+                console.error(e);
               });
 
               request.addEventListener("success", (e) => {
@@ -81,10 +83,13 @@ export default {
                 const requestUpdate = store.put(data);
 
                 requestUpdate.addEventListener("error", (e) => {
-                  console.log(e);
+                  console.error(e);
                 });
 
-                requestUpdate.addEventListener("success", (e) => {
+              requestUpdate.addEventListener("success", (e) => {
+                if (sensorElement && !sensorElement.classList.contains('sensor-bookmarked')) {
+                  sensorElement.classList.add('sensor-bookmarked');
+                }
                   this.IsBookmarked = true;
                 });
               });
@@ -105,10 +110,15 @@ export default {
               link: this.$props.link,
               geo: JSON.stringify(this.$props.geo),
             });
+            if (sensorElement && !sensorElement.classList.contains('sensor-bookmarked')) {
+              sensorElement.classList.add('sensor-bookmarked');
+            }
             this.IsBookmarked = true;
           }
         );
       }
+
+      
 
       const bc = new BroadcastChannel(this.store.idbWatcherBroadcast);
       bc.postMessage(this.store.idbBookmarkVDbtable);
@@ -123,8 +133,6 @@ export default {
       this.bookmarkid = bookmark.id;
       this.bookmarkname = bookmark.customName;
     }
-
-    console.log(this.$props);
   },
 };
 </script>

@@ -1,214 +1,323 @@
 <template>
-  <Chart :constructor-type="'stockChart'" :options="chartOptions" ref="chartRef" />
+  <Chart
+    ref="chartRef"
+    constructor-type="stockChart"
+    :options="chartOptions"
+  />
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
-import config from '@config';
+import { ref, watch, onMounted, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from "vue-i18n";
 import Highcharts from 'highcharts';
-import { Chart } from 'highcharts-vue';
 import stockInit from 'highcharts/modules/stock';
+import { Chart } from 'highcharts-vue';
 import unitsettings from '../../measurements';
+import config from '@config';
 import { getTypeProvider } from '../../utils/utils';
 
 stockInit(Highcharts);
 
-Highcharts.seriesTypes.spline.prototype.drawLegendSymbol = function (legend, item) {
-  this.options.marker.enabled = true;
-  Highcharts.LegendSymbol.lineMarker?.call(this, legend, item);
-  this.options.marker.enabled = false;
-};
-
+// Props and Refs
 const props = defineProps({
-  point: [Number, Object, String],
   log: {
     type: Array,
     default: () => []
   }
 });
 
-const chartOptions = ref({});
-const chartObj = ref(null);
-const chartRef = ref(null);
+// Global objects
 const route = useRoute();
-const provider = route.params.provider || getTypeProvider();
+const router = useRouter();
+const { t, locale } = useI18n();
 
-// EN: If the 'type' parameter is not specified in the URL, default to filtering by "pm10"
-// RU: Если в URL не задан параметр type, то фильтруем по умолчанию по "pm10"
+// Fix chart timeline for 1 hour (only for realtime mode, to ensure nice view)
+const WINDOW_MS = 60 * 60 * 1000;
+const MAX_VISIBLE = config.SERIES_MAX_VISIBLE; // For perfomance issues, if reached max - approximation added
+const VALID_TYPES = Object.keys(unitsettings).map(k => k.toLowerCase());
+const chartRef = ref(null); // Chart container
+
+// Tracks the current selected measurement type from the route
 const activeType = computed(() => {
-  return route.params.type ? route.params.type.toLowerCase() : 'pm10';
+  const t = route.params.type?.toLowerCase();
+  return VALID_TYPES.includes(t) ? t : config.DEFAULT_MEASURE_TYPE;
 });
 
-// EN: Compute all series from props.log data (with timestamp handling)
-// RU: Вычисляем все серии по данным из props.log (с обработкой timestamp)
-const series = computed(() => {
-  const unitsettingsLowerCase = Object.fromEntries(
-    Object.entries(unitsettings).map(([k, v]) => [k.toLowerCase(), v])
+// Determines if the current provider is in realtime mode
+const isRealtime = computed(() => {
+  const provider = getTypeProvider();
+  return provider === 'realtime';
+});
+
+
+// Series data managed separately
+const chartSeries = ref([]);
+
+// Reactive Highcharts config that updates when isRealtime changes
+const chartOptions = computed(() => ({
+  chart: { type: 'spline', height: 400 },
+  // rangeSelector: { inputEnabled: false, buttons: [{ type: 'all', text: 'All' }] },
+  rangeSelector: {
+    enabled: false,
+  },
+  legend: { enabled: true },
+  title: { text: '' },
+  time: { timezone: Intl.DateTimeFormat().resolvedOptions().timeZone },
+  xAxis: {
+    type: 'datetime',
+    labels: { format: '{value:%H:%M}' },
+    ordinal: !isRealtime.value
+  },
+  yAxis: { title: false },
+  tooltip: { valueDecimals: 2 },
+  plotOptions: {
+    series: {
+      showInNavigator: true,
+      dataGrouping: isRealtime.value
+        ? { enabled: false }
+        : { enabled: true, units: [['minute', [5]]] }
+    }
+  },
+  credits: {
+    enabled: false
+  },
+  series: chartSeries.value, // inject dynamic series reactively
+}));
+
+function buildSeriesArray(log, realtime, maxVisible) {
+
+  // Create a lookup table for zones, keyed by lowercase measurement type
+  const zonesMap = Object.fromEntries(
+    Object.entries(unitsettings).map(([k, v]) => [k.toLowerCase(), v.zones])
   );
-  const result = [];
-  for (const item of props.log) {
-    if (!item.timestamp) {
-      console.warn("Skipping item without timestamp", item);
-      continue;
-    }
-    if (item.data) {
-      // EN: If the timestamp has 10 digits (seconds), multiply by 1000; otherwise, use it as is
-      // RU: Если timestamp состоит из 10 цифр (секунды), умножаем на 1000; иначе используем как есть
-      const timestamp =
-        item.timestamp.toString().length === 10
-          ? item.timestamp * 1000
-          : item.timestamp;
-      for (let keyname of Object.keys(item.data)) {
-        keyname = keyname.toLowerCase();
-        const existingIndex = result.findIndex((m) => m.name === keyname);
-        if (existingIndex >= 0) {
-          result[existingIndex].data.push([timestamp, item.data[keyname]]);
-        } else {
-          result.push({
-            name: keyname,
-            data: [[timestamp, parseFloat(item.data[keyname])]],
-            zones: unitsettingsLowerCase[keyname]?.zones,
-            visible: true,
-            dataGrouping: { enabled: false }
-          });
-        }
-      }
-    }
-  }
-  for (const measurement of result) {
-    if (measurement.data.length > config.SERIES_MAX_VISIBLE) {
-      measurement.visible = false;
-      measurement.dataGrouping = { approximation: 'high' };
-    }
-  }
-  return result;
-});
 
-// EN: Filter: display only the series that matches the activeType
-// RU: Фильтрация: показываем только ту серию, которая соответствует activeType
-const filteredSeries = computed(() => {
-  // 1) Ищем совпадения с активным типом
-  const match = series.value.filter(s => s.name === activeType.value);
+  // Store series in a Map for fast access and de-duplication by id
+  const seriesMap = new Map();
 
-  console.log('TEST', match.length, series.value.filter(s => s.name === 'pm10'))
+  for (const entry of log) {
+    const { timestamp, data } = entry;
 
-  if (match.length > 0) {
-    // есть данные — возвращаем их
-    return match;
-  }
+    // Skip entries without timestamp or data
+    if (!timestamp || !data) continue;
 
-  // 2) Нет данных? Фолбэк на PM10
-  const fallback = series.value.filter(s => s.name === 'pm10');
-  return fallback;
-});
+    // Convert UNIX timestamp (in seconds) to milliseconds if needed
+    const t = String(timestamp).length === 10 ? timestamp * 1000 : timestamp;
 
-const startpoint = computed(() => {
-  if (provider === 'realtime') {
-    return Date.now();
-  } else {
-    let start = new Date();
-    start.setHours(0, 0, 0, 0);
-    return start;
-  }
-});
+    for (const [key, val] of Object.entries(data)) {
+      const id = key.toLowerCase();
 
-// EN: Update the chart when the series list changes
-// RU: Обновляем график при изменении списка серий
-watch(series, (v) => {
-  if (!chartObj.value) return;
-  // EN: Add or update all series (all series are added initially)
-  // RU: Добавляем или обновляем все серии (изначально добавляем все)
-  v.forEach(newdata => {
-    const index = chartObj.value.series.findIndex(m => m.name === newdata.name);
-    if (index >= 0) {
-      chartObj.value.series[index].setData(newdata.data, false);
-    } else {
-      chartObj.value.addSeries(newdata, false);
-    }
-  });
-  chartObj.value.redraw();
-}, { immediate: true, deep: true });
+      // On first encounter, initialize series with localized short name
+      if (!seriesMap.has(id)) {
+        const setting = unitsettings[id] || {};
+        const nameshort = setting.nameshort || {};
+        const displayName = nameshort[locale.value] || id;
 
-// EN: Apply filtering (set visibility) based on activeType
-// RU: Применяем фильтрацию (устанавливаем видимость) по activeType
-watch(filteredSeries, (newList) => {
-  if (!chartObj.value) return;
-  
-  // вытащим список имён, которые нам надо показывать
-  const namesToShow = newList.map(s => s.name);
-
-  // пройдём по всем series в графике и включим/скроем
-  chartObj.value.series.forEach(serie => {
-    serie.setVisible(namesToShow.includes(serie.name), false);
-  });
-
-  chartObj.value.redraw();
-}, { immediate: true, deep: true });
-
-
-onMounted(() => {
-  if (chartRef.value && chartRef.value.chart) {
-    chartObj.value = chartRef.value.chart;
-  }
-  
-  chartOptions.value = {
-    legend: { enabled: true },
-    rangeSelector: {
-      inputEnabled: false,
-      buttons: [{ type: "all", text: "All", title: "View all" }]
-    },
-    chart: { type: "spline", height: 400 },
-    title: { text: "" },
-    time: { timezone: Intl.DateTimeFormat().resolvedOptions().timeZone },
-    series: series.value,
-    xAxis: {
-      title: false,
-      type: "datetime",
-      labels: { overflow: "justify", format: "{value: %H:%M }" }
-    },
-    yAxis: { title: false },
-    tooltip: { valueDecimals: 2 },
-    plotOptions: {
-      series: {
-        showInNavigator: true,
-        dataGrouping: { enabled: true, units: [["minute", [5]]] },
-        events: {
-          legendItemClick: function () {
-            // EN: When the user clicks on the legend, you can disable the filtering
-            // (Standard behavior is maintained here)
-            // RU: Если пользователь кликает по легенде, можно отключить фильтрацию
-            // Или оставить выбор за пользователем – здесь оставляем стандартное поведение.
+        seriesMap.set(id, {
+          id,
+          name: displayName,    // use localized short name
+          data: [],
+          zones: zonesMap[id] || [],
+          dataGrouping: {
+            enabled: true,
+            units: [['minute', [5]]]
           }
-        }
+        });
       }
-    },
-  };
+
+      // Push raw point
+      seriesMap.get(id).data.push([t, parseFloat(val)]);
+    }
+  }
+
+  // Convert to array, apply dataGrouping logic & sort alphabetically by displayName
+  return Array.from(seriesMap.values())
+    .map(s => ({
+      ...s,
+      dataGrouping: realtime
+        ? { enabled: false }
+        : (s.data.length > maxVisible
+           ? { enabled: true, approximation: 'high', units: [['minute', [5]]] }
+           : s.dataGrouping)
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+
+// Builds a chart-ready series array from log data,
+// with realtime and performance settings applied
+const makeSeriesArray = (log) => buildSeriesArray(log, isRealtime.value, MAX_VISIBLE);
+
+
+// Initialize chart when component is mounted
+onMounted(() => {
+
+  // Checks if no any data type "activeType", show first we have in Chart
+  const all = makeSeriesArray(props.log);
+  let selectedType = activeType.value;
+  if (!all.find(s => s.id === selectedType)) {
+    selectedType = all[0]?.id;
+    if (selectedType) {
+      router.replace({
+        params: { ...route.params, type: selectedType }
+      });
+    }
+  }
+
+  // Generate initial series based on the log data and selected type
+  const initial = all.map(s => ({
+    ...s,
+    visible: s.id === selectedType
+  }));
+
+  
+  // const initial = makeSeriesArray(props.log).map(s => ({
+  //   ...s,
+  //   visible: s.id === activeType.value
+  // }));
+
+  // Set series for the chart (reactively bound via chartOptions)
+  chartSeries.value = initial;
+
+  // If in realtime mode, fix the visible time window to the last hour
+  if (isRealtime.value) {
+    setTimeout(() => {
+      const chart = chartRef.value.chart;
+
+      // Find the latest timestamp among all series
+      const lastTime = initial.reduce(
+        (max, s) => Math.max(max, s.data[s.data.length - 1]?.[0] || 0),
+        0
+      );
+
+      // Set visible time range to [lastTime - 1h, lastTime]
+      if (lastTime) {
+        chart.xAxis[0].setExtremes(lastTime - WINDOW_MS, lastTime);
+      }
+    }, 0);
+  }
 });
+
+
+// Realtime watcher
+// Dynamically append only new points to the chart when log grows
+watch(
+  () => props.log.length,
+  (newLen, oldLen) => {
+
+    if (!isRealtime.value || newLen <= oldLen) return;
+
+    const chart = chartRef.value.chart;
+
+    // 1. Rebuild and sort series alphabetically by name
+    const raw = makeSeriesArray(props.log)
+      .sort((a, b) => a.name.localeCompare(b.name));
+      
+
+    // 2. Preserve current visibility state of each series
+    const prevVis = {};
+    chart.series.forEach(s => {
+      prevVis[s.options.id] = s.visible;
+    });
+
+    // 3. Remove any series that no longer exist in the new data
+    chart.series.slice().forEach(s => {
+      if (!raw.find(ns => ns.id === s.options.id)) {
+        s.remove(false);
+      }
+    });
+
+    let maxTime = 0;
+
+    // 4. Update existing series or add new ones
+    raw.forEach(ns => {
+      const existing = chart.get(ns.id);
+      if (existing) {
+        // 4a. Update zones & dataGrouping
+        existing.update(
+          { 
+            name: ns.name,
+            zones: ns.zones, 
+            dataGrouping: ns.dataGrouping
+          },
+          false
+        );
+        // 4b. Append only new points beyond the last known timestamp
+        const lastX = existing.data.at(-1)?.x || -Infinity;
+        ns.data
+          .slice(oldLen)
+          .filter(p => p[0] > lastX)
+          .forEach(p => {
+            existing.addPoint(p, false, false);
+            maxTime = Math.max(maxTime, p[0]);
+          });
+      } else {
+        // 4c. Add brand-new series, restoring its visibility or defaulting to activeType
+        chart.addSeries(
+          { 
+            ...ns, 
+            visible: prevVis[ns.id] ?? (ns.id === activeType.value) 
+          },
+          false
+        );
+        const pts = chart.get(ns.id).data;
+        maxTime = Math.max(maxTime, pts.at(-1)?.x || 0);
+      }
+    });
+
+    // 5. In realtime mode, shift the x-axis window to show the last hour
+    if (isRealtime.value && maxTime) {
+      chart.xAxis[0].setExtremes(
+        maxTime - WINDOW_MS,
+        maxTime,
+        false,
+        false
+      );
+    }
+
+    // 6. Fallback to first series if activeType disappeared
+    if (!raw.find(s => s.id === activeType.value) && raw.length) {
+      const fallback = raw[0].id;
+      router.replace({
+        params: { ...route.params, type: fallback }
+      });
+      chart.series.forEach(s =>
+        s.setVisible(s.options.id === fallback, false)
+      );
+    }
+
+    // 7. Finally, redraw to apply all changes
+    chart.redraw();
+  }
+);
+
+// Daily recap watcher
+// Redrawes all chart if log is changed
+watch(
+  () => props.log,
+  newLog => {
+    if (isRealtime.value) return;
+
+    const all = makeSeriesArray(newLog);
+    const initial = all.map(s => ({
+      ...s,
+      visible: s.id === activeType.value
+    }));
+
+    chartSeries.value = initial;
+  },
+  { deep: true }
+);
+
 </script>
 
 <style>
-.highcharts-legend-item {
-  font-weight: 900;
-}
+.highcharts-legend-item { font-weight: 900; }
 .highcharts-legend-item .highcharts-graph,
-.highcharts-legend-item .highcharts-point {
-  stroke: #000 !important;
-}
-.highcharts-legend-item .highcharts-point {
-  fill: #000 !important;
-  stroke-width: 2;
-}
-.highcharts-legend-item-hidden text {
-  fill: #999 !important;
-  color: #999 !important;
-  text-decoration: none !important;
-}
+.highcharts-legend-item .highcharts-point { stroke: #000!important; }
+.highcharts-legend-item .highcharts-point { fill: #000!important; stroke-width: 2; }
+.highcharts-legend-item-hidden text { fill: #999!important; color: #999!important; text-decoration: none!important; }
 .highcharts-legend-item-hidden .highcharts-graph,
-.highcharts-legend-item-hidden .highcharts-point {
-  stroke: #999 !important;
-}
-.highcharts-legend-item-hidden .highcharts-point {
-  fill: #999 !important;
-}
+.highcharts-legend-item-hidden .highcharts-point { stroke: #999!important; }
+.highcharts-legend-item-hidden .highcharts-point { fill: #999!important; }
 </style>
