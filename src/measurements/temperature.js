@@ -27,7 +27,7 @@ export default {
       }
     },
     {
-      value: 0,
+      value: 1,
       color: "#2a5cbc",
       label: {
         en: "Cold",

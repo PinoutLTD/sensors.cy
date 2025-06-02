@@ -2,13 +2,23 @@ import { toFixed } from "./tools";
 
 export default {
   label: "PM2.5",
+  name: {
+    en: "Particulate matter with diameter ≤ 2.5 µm (PM2.5)",
+    ru: "Взвешенные частицы диаметром до 2,5 мкм (PM2.5)",
+    el: "Σωματίδια με διάμετρο ≤ 2,5 µm (PM2,5)"
+  },
+  nameshort: {
+    en: "PM2.5",
+    ru: "PM2.5",
+    el: "PM2.5"
+  },
   unit: "μg/m3",
   chartColor: "#89b268",
   colors: ["#60bc2a", "#ff9d00", "#fc0202"],
-  range: [0, 36, 70, 151, 251],
+  range: [0, 30, 55, 110, 251],
   zones: [
     {
-      value: 36,
+      value: 30,
       color: "#60bc2a",
       label: {
         en: "Good",
@@ -17,30 +27,30 @@ export default {
       }
     },
     {
-      value: 70,
+      value: 55,
       color: "#12bfcc",
       label: {
         en: "Satisfyingly",
-        ru: "Удовлетворительно",
+        ru: "Приемлемо",
         el: "Ικανοποιητικώς"
       }
     },
     {
-      value: 150,
+      value: 110,
       color: "#ff9d00",
       label: {
-        en: "Poor",
-        ru: "Плохо",
-        el: "Φτωχός"
+        en: "Unhealthy",
+        ru: "Вредно для здоровья",
+        el: "Ανθυγιεινός"
       }
     },
     {
       value: 250,
       color: "#ff4d00",
       label: {
-        en: "Very poor",
-        ru: "Очень плохо",
-        el: "Πάμπτωχος"
+        en: "Very Unhealthy",
+        ru: "Очень вредно для здоровья",
+        el: "Πολύ ανθυγιεινό"
       }
     },
     {

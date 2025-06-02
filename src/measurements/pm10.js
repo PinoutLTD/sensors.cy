@@ -2,6 +2,16 @@ import { toFixed } from "./tools";
 
 export default {
   label: "PM10",
+  name: {
+    en: "Particulate matter with diameter ≤ 10 µm (PM10)",
+    ru: "Взвешенные частицы диаметром до 10 мкм (PM10)",
+    el: "Σωματίδια με διάμετρο ≤ 10 µm (PM10)"
+  },
+  nameshort: {
+    en: "PM10",
+    ru: "PM10",
+    el: "PM10"
+  },
   unit: "μg/m3",
   chartColor: "#e8b738",
   colors: ["#60bc2a", "#ff9d00", "#fc0202"],
@@ -21,7 +31,7 @@ export default {
       color: "#12bfcc",
       label: {
         en: "Satisfyingly",
-        ru: "Удовлетворительно",
+        ru: "Приемлемо",
         el: "Ικανοποιητικώς"
       }
     },
@@ -29,18 +39,18 @@ export default {
       value: 250,
       color: "#ff9d00",
       label: {
-        en: "Poor",
-        ru: "Плохо",
-        el: "Φτωχός"
+        en: "Unhealthy",
+        ru: "Вредно для здоровья",
+        el: "Ανθυγιεινός"
       }
     },
     {
       value: 350,
       color: "#ff4d00",
       label: {
-        en: "Very poor",
-        ru: "Очень плохо",
-        el: "Πάμπτωχος"
+        en: "Very Unhealthy",
+        ru: "Очень вредно для здоровья",
+        el: "Πολύ ανθυγιεινό"
       }
     },
     {
