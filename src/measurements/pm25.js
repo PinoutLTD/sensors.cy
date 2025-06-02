@@ -4,11 +4,13 @@ export default {
   label: "PM2.5",
   name: {
     en: "Particulate matter with diameter ≤ 2.5 µm (PM2.5)",
-    ru: "Взвешенные частицы диаметром до 2,5 мкм (PM2.5)"
+    ru: "Взвешенные частицы диаметром до 2,5 мкм (PM2.5)",
+    el: "Σωματίδια με διάμετρο ≤ 2,5 µm (PM2,5)"
   },
   nameshort: {
     en: "PM2.5",
-    ru: "PM2.5"
+    ru: "PM2.5",
+    el: "PM2.5"
   },
   unit: "μg/m3",
   chartColor: "#89b268",
@@ -29,7 +31,8 @@ export default {
       color: "#12bfcc",
       label: {
         en: "Satisfyingly",
-        ru: "Приемлемо"
+        ru: "Приемлемо",
+        el: "Ικανοποιητικώς"
       }
     },
     {
@@ -37,7 +40,8 @@ export default {
       color: "#ff9d00",
       label: {
         en: "Unhealthy",
-        ru: "Вредно для здоровья"
+        ru: "Вредно для здоровья",
+        el: "Ανθυγιεινός"
       }
     },
     {
@@ -45,7 +49,8 @@ export default {
       color: "#ff4d00",
       label: {
         en: "Very Unhealthy",
-        ru: "Очень вредно для здоровья"
+        ru: "Очень вредно для здоровья",
+        el: "Πολύ ανθυγιεινό"
       }
     },
     {

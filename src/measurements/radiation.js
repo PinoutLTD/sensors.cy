@@ -19,7 +19,8 @@ export default {
       color: "#03a5ed",
       label: {
         en: "Background",
-        ru: "Естественный фон"
+        ru: "Естественный фон",
+        el: "Φόντο"
       }
     },
     {
@@ -53,7 +54,8 @@ export default {
       color: "#7a00da",
       label: {
         en: "Unacceptable",
-        ru: "Неприемлемо"
+        ru: "Неприемлемо",
+        el: "Απαράδεκτος"
       }
     },
   ],

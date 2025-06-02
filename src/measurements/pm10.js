@@ -4,11 +4,13 @@ export default {
   label: "PM10",
   name: {
     en: "Particulate matter with diameter ≤ 10 µm (PM10)",
-    ru: "Взвешенные частицы диаметром до 10 мкм (PM10)"
+    ru: "Взвешенные частицы диаметром до 10 мкм (PM10)",
+    el: "Σωματίδια με διάμετρο ≤ 10 µm (PM10)"
   },
   nameshort: {
     en: "PM10",
-    ru: "PM10"
+    ru: "PM10",
+    el: "PM10"
   },
   unit: "μg/m3",
   chartColor: "#e8b738",
@@ -38,7 +40,8 @@ export default {
       color: "#ff9d00",
       label: {
         en: "Unhealthy",
-        ru: "Вредно для здоровья"
+        ru: "Вредно для здоровья",
+        el: "Ανθυγιεινός"
       }
     },
     {
@@ -46,7 +49,8 @@ export default {
       color: "#ff4d00",
       label: {
         en: "Very Unhealthy",
-        ru: "Очень вредно для здоровья"
+        ru: "Очень вредно для здоровья",
+        el: "Πολύ ανθυγιεινό"
       }
     },
     {
