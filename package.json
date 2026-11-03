@@ -24,7 +24,7 @@
     "buffer": "^6.0.3",
     "chroma-js": "^2.4.2",
     "events": "^3.3.0",
-    "highcharts": "^11.4.3",
+    "highcharts": "^11.4.9",
     "highcharts-vue": "^2.0.1",
     "js-file-download": "^0.4.12",
     "js-queue": "^2.0.2",
